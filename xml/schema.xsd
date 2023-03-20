@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+    elementFormDefault="qualified"
+    vc:minVersion="1.1">
+    <!-- root element -->
+    <xs:element name="document" type="Document" />
+
+    <!-- type definitions -->
+    <xs:complexType name="Document">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="directive" />
+            <xs:element ref="include" />
+        </xs:choice>
+        <xs:attribute ref="generatedBy" />
+    </xs:complexType>
+
+    <xs:element name="include">
+        <xs:complexType>
+            <xs:attribute name="src" type="xs:anyURI" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="directive" abstract="true" />
+
+    <xs:element name="entry" type="Entry" substitutionGroup="directive" />
+    <xs:element name="impact" abstract="true" substitutionGroup="directive" />
+    <xs:element name="relation" abstract="true" substitutionGroup="directive" />
+    <xs:element name="contains">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="directive" />
+                <xs:element ref="contains" />
+            </xs:choice>
+            <xs:attribute name="factor" type="ContainFactor" />
+            <xs:attribute name="id" type="EntryId" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="script" substitutionGroup="directive">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="src" type="xs:anyURI" />
+                    <xs:attribute name="lang" type="xs:string" />
+                    <xs:attribute name="entryPoint" type="xs:string" />
+                    <xs:attribute ref="generatedBy" />
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="entryMeta" abstract="true" />
+    <xs:element name="impactMeta" abstract="true" />
+    <xs:element name="relationMeta" abstract="true" />
+
+    <xs:element name="source" substitutionGroup="entryMeta">
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="mal" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required" />
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="al" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="adb" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="ks" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="vndb" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="vgmdb" minOccurs="0">
+                    <xs:complexType>
+                        <xs:attribute name="artist" type="xs:positiveInteger" />
+                        <xs:attribute name="album" type="xs:positiveInteger" />
+                        <xs:attribute name="disc" type="xs:positiveInteger" />
+                        <xs:attribute name="track" type="xs:positiveInteger" />
+                        <xs:attribute name="product" type="xs:positiveInteger" />
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="urls" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="url" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:element ref="meta" />
+                                    </xs:choice>
+                                    <xs:attribute name="name" type="xs:string" use="required" />
+                                    <xs:attribute name="src" type="xs:anyURI" use="required" />
+                                    <xs:attribute ref="generatedBy" />
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute ref="generatedBy" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:all>
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="def" substitutionGroup="directive">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" />
+            <xs:attribute name="vars" type="xs:string" />
+            <xs:attribute name="visibility" type="Visibility" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ref" substitutionGroup="directive">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" />
+            <xs:attribute ref="generatedBy" />
+            <xs:anyAttribute processContents="skip" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="regularImpact" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                        <xs:element name="score">
+                            <xs:complexType>
+                                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                                    <xs:element name="component">
+                                        <xs:complexType>
+                                            <xs:attribute name="value" type="xs:double"
+                                                use="required" />
+                                            <xs:attribute name="factor" type="FactorScore"
+                                                use="required" />
+                                            <xs:attribute ref="generatedBy" />
+                                        </xs:complexType>
+                                    </xs:element>
+                                </xs:sequence>
+                                <xs:attribute name="vector" type="VectorString" />
+                                <xs:attribute ref="generatedBy" />
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- DAH_standards -->
+    <xs:element name="cry" substitutionGroup="impact" type="EmotionImpact" />
+    <xs:element name="pads" substitutionGroup="impact" type="LengthEmotionImpact" />
+    <xs:element name="maxAEIPADS" substitutionGroup="impact" type="LengthEmotionImpact" />
+    <xs:element name="cryPADS" substitutionGroup="impact" type="LengthEmotionImpact" />
+    <xs:element name="nei" substitutionGroup="impact" type="BaseScoredEmotionImpact" />
+    <xs:element name="aei" substitutionGroup="impact" type="BaseScoredEmotionImpact" />
+    <xs:element name="waifu" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="LengthEmotionImpact">
+                    <xs:attribute name="waifu" type="xs:string" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ehi" substitutionGroup="impact" type="Impact" />
+    <xs:element name="epi" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="base" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="jumpscare" substitutionGroup="impact" type="Impact" />
+    <xs:element name="sleeplessNight" substitutionGroup="impact" type="Impact" />
+    <xs:element name="politics" substitutionGroup="impact" type="Impact" />
+    <xs:element name="interestField" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="new" type="xs:boolean" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="consume" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="boredom" type="xs:double" />
+                    <xs:attribute name="length" type="Duration" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- AnimeConsumed is not ported because it's not actually used in the DSL -->
+
+    <xs:element name="dropped" substitutionGroup="impact" type="Impact" />
+    <xs:element name="animeProgressOld" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="episodes" type="xs:positiveInteger" />
+                    <xs:attribute name="boredom">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="completed" />
+                                <xs:enumeration value="watching" />
+                                <xs:enumeration value="tempOnHold" />
+                                <xs:enumeration value="completedWithNoticeableBoredom" />
+                                <xs:enumeration value="dropped" />
+                                <xs:enumeration value="unwatched" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="meme" substitutionGroup="impact" type="LengthImpact" />
+    <xs:element name="music" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="base" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="additional" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="value" type="xs:double" use="required" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="visual" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="type" type="VisualKind" />
+                    <xs:attribute name="base" type="xs:double" />
+                    <xs:attribute name="unique" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="osuSong" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="personal" type="xs:double" />
+                    <xs:attribute name="community" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="remix" substitutionGroup="relation">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Relation">
+                    <xs:attribute name="id" type="EntryId" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="featureMusic" substitutionGroup="relation">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Relation">
+                    <xs:attribute name="id" type="EntryId" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="killedBy" substitutionGroup="relation">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Relation">
+                    <xs:attribute name="id" type="EntryId" />
+                    <xs:attribute name="potential" type="xs:double" />
+                    <xs:attribute name="effect" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- DAH_entry_progress -->
+    <xs:element name="progress" substitutionGroup="entryMeta">
+        <xs:complexType>
+            <xs:attribute name="status" type="EntryStatus" />
+            <xs:attribute name="duration" type="Duration" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="animeProgress" substitutionGroup="entryMeta">
+        <xs:complexType>
+            <xs:attribute name="status" type="EntryStatus" />
+            <xs:attribute name="episodes" type="xs:positiveInteger" />
+            <xs:attribute name="episodeDuration" type="Duration" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="consumedProgress">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="status" type="EntryStatus" />
+                    <xs:attribute name="boredom" type="xs:double" />
+                    <xs:attribute name="duration" type="Duration" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="animeConsumedProgress">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="status" type="EntryStatus" />
+                    <xs:attribute name="boredom" type="xs:double" />
+                    <xs:attribute name="episodes" type="xs:positiveInteger" />
+                    <xs:attribute name="episodeDuration" type="Duration" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="musicConsumedProgress" substitutionGroup="entryMeta">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="length" type="Duration" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="contributor">
+        <xs:complexType>
+            <xs:attribute name="id" type="EntryId" use="required" />
+            <xs:attribute name="factor" type="xs:double" use="required" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="meta">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required" />
+            <xs:attribute name="value" type="xs:string" use="required" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="Entry">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="bestGirl">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute ref="generatedBy" />
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element ref="directive" />
+            <xs:element ref="entryMeta" />
+            <xs:element ref="contains" />
+        </xs:choice>
+        <xs:attribute name="id" type="EntryId" use="required" />
+        <xs:attribute name="title" type="xs:string" use="required" />
+        <xs:attribute ref="generatedBy" />
+    </xs:complexType>
+
+    <xs:complexType name="Impact">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="contributor" />
+            <xs:element ref="script" />
+            <xs:element ref="meta" />
+            <xs:element ref="impactMeta" />
+        </xs:choice>
+        <xs:attribute ref="generatedBy" />
+    </xs:complexType>
+
+    <xs:complexType name="EmotionImpact">
+        <xs:complexContent>
+            <xs:extension base="Impact">
+                <xs:attribute name="emotions" type="EIEmotions" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="BaseScoredEmotionImpact">
+        <xs:complexContent>
+            <xs:extension base="EmotionImpact">
+                <xs:attribute name="base" type="xs:double" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="LengthImpact">
+        <xs:complexContent>
+            <xs:extension base="Impact">
+                <xs:sequence>
+                    <xs:element name="periods" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="length" type="xs:positiveInteger" />
+                            <xs:attribute name="from" type="Date" />
+                            <xs:attribute name="to" type="Date" />
+                            <xs:attribute ref="generatedBy" />
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="length" type="xs:positiveInteger" />
+                <xs:attribute name="from" type="Date" />
+                <xs:attribute name="to" type="Date" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="LengthEmotionImpact">
+        <xs:complexContent>
+            <xs:extension base="EmotionImpact">
+                <xs:sequence>
+                    <xs:element name="periods" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="length" type="xs:positiveInteger" />
+                            <xs:attribute name="from" type="Date" />
+                            <xs:attribute name="to" type="Date" />
+                            <xs:attribute ref="generatedBy" />
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="length" type="xs:positiveInteger" />
+                <xs:attribute name="from" type="Date" />
+                <xs:attribute name="to" type="Date" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Relation">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="contributor" />
+            <xs:element ref="script" />
+            <xs:element ref="meta" />
+            <xs:element ref="relationMeta" />
+        </xs:choice>
+        <xs:attribute ref="generatedBy" />
+    </xs:complexType>
+
+    <xs:simpleType name="VectorString">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){10}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="MatrixString">
+        <xs:restriction base="xs:string">
+            <xs:pattern
+                value="(diag\([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){10}\))|([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){120})" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Subscore">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Emotion" />
+            <xs:enumeration value="Art" />
+            <xs:enumeration value="Boredom" />
+            <xs:enumeration value="Additional" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="FactorScore">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Emotion.AP" />
+            <xs:enumeration value="Emotion.AU" />
+            <xs:enumeration value="Emotion.MP" />
+            <xs:enumeration value="Emotion.MU" />
+            <xs:enumeration value="Emotion.CP" />
+            <xs:enumeration value="Emotion.CU" />
+            <xs:enumeration value="Art.Language" />
+            <xs:enumeration value="Art.Visual" />
+            <xs:enumeration value="Art.Music" />
+            <xs:enumeration value="Boredom" />
+            <xs:enumeration value="Additional" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Emotion">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AP" />
+            <xs:enumeration value="AU" />
+            <xs:enumeration value="MP" />
+            <xs:enumeration value="MU" />
+            <xs:enumeration value="CP" />
+            <xs:enumeration value="CU" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EIEmotions">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[AMC][UP]|[AMC][UP]-[01]\.\d*(:[AMC][UP]-[01]\.\d*)+" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EntryStatus">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Completed" />
+            <xs:enumeration value="Watching" />
+            <xs:enumeration value="Dropped" />
+            <xs:enumeration value="Temporarily On-Hold" />
+            <xs:enumeration value="Unwatched" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ContainFactorExpr">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(vocal|inst|image)(\+(vocal|inst|image))*"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ContainFactor">
+        <xs:union memberTypes="xs:double ContainFactorExpr" />
+    </xs:simpleType>
+
+    <xs:simpleType name="VisualKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="animated">
+                <xs:annotation>
+                    <xs:documentation> Long animated content (including Western cartoon series, TV
+                        and Movie anime, etc.). Example: Re:Stage! anime (A-MAL-38009):
+                        https://animixplay.to/v1/restage-dream-days (rip AniMixPlay) or
+                        https://zoro.bz/watch/restage-dream-days.xyv3 </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="rpg3dGame">
+                <xs:annotation>
+                    <xs:documentation> Video games that features 3D art (not limited to RPG 3D game)
+                        with relatively smooth animation, commonly found in RPG 3D games. Example:
+                        Atelier Escha &amp; Logy (G-VGMDB-1880):
+                        https://store.steampowered.com/app/1152310/Atelier_Escha__Logy_Alchemists_of_the_Dusk_Sky_DX/
+                        </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="animatedShort">
+                <xs:annotation>
+                    <xs:documentation> Short animated content (including anime OVA, ONA, etc.). The
+                        line between `animated` and `animatedShort` is not clearly defined. Example:
+                        Porter Robinson &amp; Madeon - Shelter:
+                        https://www.youtube.com/watch?v=fzQ6gRAEoy0 </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="animatedMV">
+                <xs:annotation>
+                    <xs:documentation> Short animated music videos. The line between `animatedShort`
+                        and `animatedMV`, once again, is not clearly defined (tbh doesn't matter
+                        because same base score). Example: Cyan &amp; Howan (tinhf) - How to Fly:
+                        https://www.youtube.com/watch?v=IqdpYyaLnNc </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="visualNovel">
+                <xs:annotation>
+                    <xs:documentation> A visual novel (Japanese: ビジュアルノベル, Hepburn: bijuaru noberu),
+                        often abbreviated as VN, is a form of digital semi-interactive fiction.
+                        Visual novels are often associated with and used in the medium of video
+                        games, but are not always labeled as such themselves. They combine a textual
+                        narrative with static or animated illustrations and a varying degree of
+                        interactivity. The format is more rarely referred to as novel game, a
+                        retranscription of the wasei-eigo term noberu gēmu (ノベルゲーム), which is more
+                        often used in Japanese.The NRS definition is more lenient. A visual novel is
+                        a game that features a great deal of still images with sufficient
+                        resolution. Example: Aokana:
+                        https://store.steampowered.com/app/1044620/Aokana__Four_Rhythms_Across_the_Blue/
+                        </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="manga">
+                <xs:annotation>
+                    <xs:documentation> Manga (Japanese: 漫画 [maŋga])[a] are comics or graphic novels
+                        originating from Japan. Most manga conform to a style developed in Japan in
+                        the late 19th century, and the form has a long history in earlier Japanese
+                        art. The term manga is used in Japan to refer to both comics and cartooning.
+                        Outside of Japan, the word is typically used to refer to comics originally
+                        published in the country. The NRS definition is more lenient. A manga is a
+                        collection of still images. This definition may be confused with visual
+                        novels, but since they have the same base score, who cares. Example: The
+                        Eminence in Shadow (manga) (kys sherryposters, sherrybaiters and
+                        sheisliterallymeposters):
+                        https://myanimelist.net/manga/119022/Kage_no_Jitsuryokusha_ni_Naritakute </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="animatedGachaCardArt">
+                <xs:annotation>
+                    <xs:documentation> A compilation of very short animated content (some seconds),
+                        commonly found in the form of Live2D animated gacha card art. Example: a
+                        random lapis re light card art (rip):
+                        https://twitter.com/lapi_staff/status/1555750517887975425 </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="gachaCardArt">
+                <xs:annotation>
+                    <xs:documentation> A relatively large compilation of still images. "hOw dO yOu
+                        dIfFeReNtIaTe tHiS wItH mAnGa/ViSuAl nOvElS" no one cares about that level
+                        of pedantic stfu. Example: W franchise (imagine having to cocksuck lantis
+                        cocksuckers): https://lldetail.ml/Restage/card-viewer.html </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="lightNovel">
+                <xs:annotation>
+                    <xs:documentation> A relatively small compilation of still images. "hOw dO yOu
+                        dIfFeReNtIaTe tHiS wItH mAnGa/ViSuAl nOvElS/gAcHa cArD aRtS" no one cares
+                        about that level of pedantic stfu. Example: a random COTE illustration (uoh
+                        segssss with arisu chan sob sob sob skull dude is down bad):
+                        https://danbooru.donmai.us/posts/2905913 </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="semiAnimatedMV">
+                <xs:annotation>
+                    <xs:documentation> Semi-animated music videos. Semi-animated is a middle ground
+                        between static background and animation, utilizing only a handful of
+                        background frames. The line between `semiAnimatedMV` and `animatedMV` is not
+                        clearly defined. Example: Plasmagica - Bokura no Neiro:
+                        https://www.youtube.com/watch?v=vyaGNvuVDuM </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="staticMV">
+                <xs:annotation>
+                    <xs:documentation> Music videos that only have a static background, or not
+                        "semi-animated" enough to be considered `semiAnimatedMV`. Usually high
+                        resolution. Example: MIMI - <strikethrough>10 things I hate about </strikethrough>
+                        Ai no Sukima (ft. Hatsune Miku): https://www.youtube.com/watch?v=fztKqreP1pk </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="albumArt">
+                <xs:annotation>
+                    <xs:documentation> Album art, which is usually low resolution. Example: the
+                        image you see on the vgmdb album page Actual example: dell ai nhu nhat minh
+                        dell ai nhu the king:
+                        https://medium-media.vgm.io/albums/86/121168/121168-de8dcf1b4ceb.jpg </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Visibility">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="public" />
+            <xs:enumeration value="private" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Program">
+        <xs:restriction base="xs:string">
+            <xs:pattern
+                value="|[a-zA-Z0-9 \.,_]+ v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EntryId">
+        <xs:restriction base="xs:string">
+            <xs:pattern
+                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="SpecialDate">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(today|epoch)([+-]\d+)?" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Date">
+        <xs:union memberTypes="SpecialDate xs:date" />
+    </xs:simpleType>
+
+    <xs:simpleType name="Duration">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\d+:)?\d\d?:\d{2}" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:attribute name="generatedBy" type="Program" default="">
+        <xs:annotation>
+            <xs:documentation> This should only be produced when the owner element of the attribute
+                is generated via a program. The value should be in the form of "$(PROGRAM NAME)
+                $(VERSION)". $(PROGRAM NAME) must be an alphanumeric string (with additional symbols
+                like underscores, whitespaces, commas, dots, and $(VERSION) must be a valid semantic
+                version string, see: https://semver.org/) </xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+</xs:schema> 

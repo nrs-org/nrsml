@@ -1,0 +1,36 @@
+{
+  "version": "2",
+  "remote": {
+    "https://deno.land/std@0.179.0/fmt/colors.ts": "938c5d44d889fb82eff6c358bea8baa7e85950a16c9f6dae3ec3a7a729164471",
+    "https://deno.land/std@0.179.0/testing/_diff.ts": "1a3c044aedf77647d6cac86b798c6417603361b66b54c53331b312caeb447aea",
+    "https://deno.land/std@0.179.0/testing/_format.ts": "a69126e8a469009adf4cf2a50af889aca364c349797e63174884a52ff75cf4c7",
+    "https://deno.land/std@0.179.0/testing/asserts.ts": "984ab0bfb3faeed92ffaa3a6b06536c66811185328c5dd146257c702c41b01ab",
+    "https://deno.land/x/ts_xml_parser@1.0.0/mod.ts": "91429dfad1d664f561546fe21f1d634f0da76d17aabc4dd5f3d425ca1e847da0",
+    "https://deno.land/x/ts_xml_parser@1.0.0/src/parser.ts": "fe8f0ca8c5e72034d6cabc50b54cac0d76017f11060f4712933caab5a2ee8568",
+    "https://deno.land/x/xml@2.1.0/mod.ts": "4a314a7a28d1ec92f899ce4c6991f0356c77550a75955ec3f4a36733f08548e8",
+    "https://deno.land/x/xml@2.1.0/parse.ts": "614b8648345ae93c641368836947484d321c7ac9312ae12ec750434353cd7385",
+    "https://deno.land/x/xml@2.1.0/stringify.ts": "930d35431f153b29d36549cff08fcfbe978e52ccb56af1e3baa2e0760f418b04",
+    "https://deno.land/x/xml@2.1.0/utils/parser.ts": "d90380a807e083fcad68ee18e63e62b49c2239009c46592ece82dc8df65f4530",
+    "https://deno.land/x/xml@2.1.0/utils/stream.ts": "056e2f368d47932d77e431bbc4a8292359171cc9ce881ea31ce0aae30d763e68",
+    "https://deno.land/x/xml@2.1.0/utils/streamable.ts": "1603a5f10c859b95d4e9502365a0fba0b19d5d068356e20d5a6813cd37fee780",
+    "https://deno.land/x/xml@2.1.0/utils/stringifier.ts": "6c828e8391808c9e5381ff62299984950c903f976f5afc98250f9ee276d08f93",
+    "https://deno.land/x/xml@2.1.0/utils/types.ts": "5fc5c558337b8a82016629117e7fa348faec50951c878d14d293843aa5e92e1d"
+  },
+  "npm": {
+    "specifiers": {
+      "fast-xml-parser@4": "fast-xml-parser@4.1.3"
+    },
+    "packages": {
+      "fast-xml-parser@4.1.3": {
+        "integrity": "sha512-LsNDahCiCcJPe8NO7HijcnukHB24tKbfDDA5IILx9dmW3Frb52lhbeX6MPNUSvyGNfav2VTYpJ/OqkRoVLrh2Q==",
+        "dependencies": {
+          "strnum": "strnum@1.0.5"
+        }
+      },
+      "strnum@1.0.5": {
+        "integrity": "sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==",
+        "dependencies": {}
+      }
+    }
+  }
+}
