@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
     elementFormDefault="qualified"
     vc:minVersion="1.1">
@@ -50,7 +51,8 @@
             </xs:simpleContent>
         </xs:complexType>
     </xs:element>
-
+    
+    <xs:element name="commonMeta" abstract="true" />
     <xs:element name="entryMeta" abstract="true" />
     <xs:element name="impactMeta" abstract="true" />
     <xs:element name="relationMeta" abstract="true" />
@@ -66,25 +68,25 @@
                 </xs:element>
                 <xs:element name="al" minOccurs="0">
                     <xs:complexType>
-                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute name="id" type="xs:integer" use="required" />
                         <xs:attribute ref="generatedBy" />
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="adb" minOccurs="0">
                     <xs:complexType>
-                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute name="id" type="xs:integer" use="required" />
                         <xs:attribute ref="generatedBy" />
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="ks" minOccurs="0">
                     <xs:complexType>
-                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute name="id" type="xs:integer" use="required" />
                         <xs:attribute ref="generatedBy" />
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="vndb" minOccurs="0">
                     <xs:complexType>
-                        <xs:attribute name="id" type="xs:integer" use="required"></xs:attribute>
+                        <xs:attribute name="id" type="xs:integer" use="required" />
                         <xs:attribute ref="generatedBy" />
                     </xs:complexType>
                 </xs:element>
@@ -153,10 +155,16 @@
                                 <xs:sequence minOccurs="0" maxOccurs="unbounded">
                                     <xs:element name="component">
                                         <xs:complexType>
-                                            <xs:attribute name="value" type="xs:double"
-                                                use="required" />
-                                            <xs:attribute name="factor" type="FactorScore"
-                                                use="required" />
+                                            <xs:attribute
+                                                name="value"
+                                                type="xs:double"
+                                                use="required"
+                                            />
+                                            <xs:attribute
+                                                name="factor"
+                                                type="FactorScore"
+                                                use="required"
+                                            />
                                             <xs:attribute ref="generatedBy" />
                                         </xs:complexType>
                                     </xs:element>
@@ -193,7 +201,7 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="base" type="xs:double" />
+                    <xs:attribute name="base" type="xs:double" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -264,6 +272,7 @@
             <xs:complexContent>
                 <xs:extension base="Impact">
                     <xs:attribute name="value" type="xs:double" use="required" />
+                    <xs:attribute name="note" type="xs:string" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -273,9 +282,9 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="type" type="VisualKind" />
-                    <xs:attribute name="base" type="xs:double" />
-                    <xs:attribute name="unique" type="xs:double" />
+                    <xs:attribute name="type" type="VisualKind" use="required" />
+                    <xs:attribute name="base" type="xs:double" use="required" />
+                    <xs:attribute name="unique" type="xs:double" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -296,7 +305,7 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Relation">
-                    <xs:attribute name="id" type="EntryId" />
+                    <xs:attribute name="id" type="EntryId" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -306,7 +315,7 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Relation">
-                    <xs:attribute name="id" type="EntryId" />
+                    <xs:attribute name="id" type="EntryId" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -316,9 +325,9 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Relation">
-                    <xs:attribute name="id" type="EntryId" />
-                    <xs:attribute name="potential" type="xs:double" />
-                    <xs:attribute name="effect" type="xs:double" />
+                    <xs:attribute name="id" type="EntryId" use="required" />
+                    <xs:attribute name="potential" type="xs:double" use="required" />
+                    <xs:attribute name="effect" type="xs:double" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -327,40 +336,40 @@
     <!-- DAH_entry_progress -->
     <xs:element name="progress" substitutionGroup="entryMeta">
         <xs:complexType>
-            <xs:attribute name="status" type="EntryStatus" />
-            <xs:attribute name="duration" type="Duration" />
+            <xs:attribute name="status" type="EntryStatus" use="required" />
+            <xs:attribute name="duration" type="Duration" use="required" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
 
     <xs:element name="animeProgress" substitutionGroup="entryMeta">
         <xs:complexType>
-            <xs:attribute name="status" type="EntryStatus" />
-            <xs:attribute name="episodes" type="xs:positiveInteger" />
+            <xs:attribute name="status" type="EntryStatus" use="required" />
+            <xs:attribute name="episodes" type="xs:positiveInteger" use="required" />
             <xs:attribute name="episodeDuration" type="Duration" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="consumedProgress">
+    <xs:element name="consumedProgress" substitutionGroup="entryMeta">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="status" type="EntryStatus" />
-                    <xs:attribute name="boredom" type="xs:double" />
-                    <xs:attribute name="duration" type="Duration" />
+                    <xs:attribute name="status" type="EntryStatus" use="required" />
+                    <xs:attribute name="boredom" type="xs:double" use="required" />
+                    <xs:attribute name="duration" type="Duration" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="animeConsumedProgress">
+    <xs:element name="animeConsumedProgress" substitutionGroup="entryMeta">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="status" type="EntryStatus" />
-                    <xs:attribute name="boredom" type="xs:double" />
-                    <xs:attribute name="episodes" type="xs:positiveInteger" />
+                    <xs:attribute name="status" type="EntryStatus" use="required" />
+                    <xs:attribute name="boredom" type="xs:double" use="required" />
+                    <xs:attribute name="episodes" type="xs:positiveInteger" use="required" />
                     <xs:attribute name="episodeDuration" type="Duration" />
                 </xs:extension>
             </xs:complexContent>
@@ -371,7 +380,7 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="length" type="Duration" />
+                    <xs:attribute name="length" type="Duration" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -385,7 +394,15 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="meta">
+    <xs:element name="reference">
+        <xs:complexType>
+            <xs:attribute name="id" type="EntryId" use="required" />
+            <xs:attribute name="factor" type="MatrixString" use="required" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="meta" substitutionGroup="commonMeta">
         <xs:complexType>
             <xs:attribute name="key" type="xs:string" use="required" />
             <xs:attribute name="value" type="xs:string" use="required" />
@@ -393,19 +410,24 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="bestGirl" substitutionGroup="entryMeta">
+        <xs:complexType>
+                <xs:attribute ref="generatedBy" />
+                <xs:attribute type="xs:string" name="name" use="required" />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="validatorSuppress" substitutionGroup="commonMeta">
+        <xs:complexType>
+            <xs:attribute name="rules" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
     <xs:complexType name="Entry">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <xs:element name="bestGirl">
-                <xs:complexType>
-                    <xs:simpleContent>
-                        <xs:extension base="xs:string">
-                            <xs:attribute ref="generatedBy" />
-                        </xs:extension>
-                    </xs:simpleContent>
-                </xs:complexType>
-            </xs:element>
             <xs:element ref="directive" />
             <xs:element ref="entryMeta" />
+            <xs:element ref="commonMeta" />
             <xs:element ref="contains" />
         </xs:choice>
         <xs:attribute name="id" type="EntryId" use="required" />
@@ -417,7 +439,7 @@
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="contributor" />
             <xs:element ref="script" />
-            <xs:element ref="meta" />
+            <xs:element ref="commonMeta" />
             <xs:element ref="impactMeta" />
         </xs:choice>
         <xs:attribute ref="generatedBy" />
@@ -426,7 +448,7 @@
     <xs:complexType name="EmotionImpact">
         <xs:complexContent>
             <xs:extension base="Impact">
-                <xs:attribute name="emotions" type="EIEmotions" />
+                <xs:attribute name="emotions" type="EIEmotions" use="required" />
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -434,7 +456,7 @@
     <xs:complexType name="BaseScoredEmotionImpact">
         <xs:complexContent>
             <xs:extension base="EmotionImpact">
-                <xs:attribute name="base" type="xs:double" />
+                <xs:attribute name="base" type="xs:double" use="required" />
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -482,8 +504,9 @@
     <xs:complexType name="Relation">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="contributor" />
+            <xs:element ref="reference" />
             <xs:element ref="script" />
-            <xs:element ref="meta" />
+            <xs:element ref="commonMeta" />
             <xs:element ref="relationMeta" />
         </xs:choice>
         <xs:attribute ref="generatedBy" />
@@ -498,7 +521,8 @@
     <xs:simpleType name="MatrixString">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="(diag\([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){10}\))|([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){120})" />
+                value="(diag\([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){10}\))|([+-]?([0-9]*[.])?[0-9]+(,[+-]?([0-9]*[.])?[0-9]+){120})"
+            />
         </xs:restriction>
     </xs:simpleType>
 
@@ -556,7 +580,7 @@
 
     <xs:simpleType name="ContainFactorExpr">
         <xs:restriction base="xs:string">
-            <xs:pattern value="(vocal|inst|image)(\+(vocal|inst|image))*"></xs:pattern>
+            <xs:pattern value="(vocal|inst|image)(\+(vocal|inst|image))*" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -704,14 +728,16 @@
     <xs:simpleType name="Program">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="|[a-zA-Z0-9 \.,_]+ v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?" />
+                value="|[a-zA-Z0-9 \.,_]+ v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?"
+            />
         </xs:restriction>
     </xs:simpleType>
 
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})"></xs:pattern>
+                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})"
+            />
         </xs:restriction>
     </xs:simpleType>
 
@@ -740,4 +766,4 @@
                 version string, see: https://semver.org/) </xs:documentation>
         </xs:annotation>
     </xs:attribute>
-</xs:schema> 
+</xs:schema>
