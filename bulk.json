@@ -1,0 +1,1589 @@
+{
+    "entries": {
+        "F-VGMDB-9540": {
+            "id": "F-VGMDB-9540",
+            "children": {
+                "A-MAL-43735": 1,
+                "M-VGMDB-AL-115724": 1,
+                "M-VGMDB-AR-33857": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "CUE!",
+                "DAH_additional_sources": {
+                    "vgmdb": {
+                        "product": "9540"
+                    },
+                    "urls": [
+                        {
+                            "name": "website",
+                            "src": "https://www.cue-liber.jp/",
+                            "DAH_meta": {
+                                "lang": "ja-JP"
+                            }
+                        },
+                        {
+                            "name": "wikidata",
+                            "src": "https://www.wikidata.org/wiki/Q85864830",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "wikipedia",
+                            "src": "https://en.wikipedia.org/wiki/Cue!_(video_game)",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "wikipedia",
+                            "src": "https://ja.wikipedia.org/wiki/CUE!#%E3%83%86%E3%83%AC%E3%83%93%E3%82%A2%E3%83%8B%E3%83%A1",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "fandom",
+                            "src": "https://cue.fandom.com/wiki/",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "fandom",
+                            "src": "https://cue-eng.fandom.com/wiki/",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "twitter",
+                            "src": "https://twitter.com/CUE_staff",
+                            "DAH_meta": {
+                                "lang": "ja-JP"
+                            }
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/@cue-airblue",
+                            "DAH_meta": {
+                                "lang": "ja-JP"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "A-MAL-43735": {
+            "id": "A-MAL-43735",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "Cue!",
+                "DAH_additional_sources": {
+                    "id_MyAnimeList": 43735,
+                    "id_AniList": 43735,
+                    "id_Kitsu": 44979,
+                    "id_AniDB": 43735,
+                    "vgmdb": {
+                        "product": "9541"
+                    },
+                    "urls": [
+                        {
+                            "name": "website",
+                            "src": "https://cue-animation.jp",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "wikipedia",
+                            "src": "https://en.wikipedia.org/wiki/Cue!_(video_game)#Anime",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "wikipedia",
+                            "src": "https://ja.wikipedia.org/wiki/CUE!#%E3%83%86%E3%83%AC%E3%83%93%E3%82%A2%E3%83%8B%E3%83%A1",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "fandom",
+                            "src": "https://cue.fandom.com/wiki/CUE!_(Anime)",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "twitter",
+                            "src": "https://twitter.com/cue_anime",
+                            "DAH_meta": {
+                                "lang": "ja-JP"
+                            }
+                        },
+                        {
+                            "name": "zoro.bz",
+                            "src": "https://zoro.bz/watch/cue.r5qp",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "9anime.to",
+                            "src": "https://9anime.to/watch/cue.r5qp",
+                            "DAH_meta": {}
+                        }
+                    ]
+                },
+                "DAH_entry_bestGirl": "Haruna Mutsuishi",
+                "DAH_entry_progress": {
+                    "status": "Completed",
+                    "progress": "PT8H",
+                    "episodes": 24
+                }
+            }
+        },
+        "M-VGMDB-AL-115724": {
+            "id": "M-VGMDB-AL-115724",
+            "children": {
+                "M-VGMDB-AL-115724-1": 1,
+                "M-VGMDB-AL-115724-2": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "Start Line/Hajimari no Kanenone ga Narihibiku Sora / AiRBLUE",
+                "DAH_additional_sources": {
+                    "vgmdb": {
+                        "album": "115724"
+                    },
+                    "urls": [
+                        {
+                            "name": "spotify",
+                            "src": "https://open.spotify.com/album/5jiPk4wXg4CGKTWujKTZW0",
+                            "DAH_meta": {}
+                        }
+                    ]
+                }
+            }
+        },
+        "M-VGMDB-AL-115724-1": {
+            "id": "M-VGMDB-AL-115724-1",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "スタートライン",
+                "DAH_additional_sources": {
+                    "vgmdb": {
+                        "album": "115724",
+                        "disc": "1",
+                        "track": "1"
+                    },
+                    "urls": [
+                        {
+                            "name": "spotify",
+                            "src": "https://open.spotify.com/track/74A1ab3JWsrLtjn7rk2fGP",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=h0C2e991hjA",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=4IJXVNNC4Eo",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=FfFwJH2ap4U",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=mZPxAab1wys",
+                            "DAH_meta": {}
+                        }
+                    ]
+                }
+            }
+        },
+        "M-VGMDB-AL-115724-2": {
+            "id": "M-VGMDB-AL-115724-2",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "はじまりの鐘の音が鳴り響く空",
+                "DAH_additional_sources": {
+                    "vgmdb": {
+                        "album": "115724",
+                        "disc": "1",
+                        "track": "2"
+                    },
+                    "urls": [
+                        {
+                            "name": "spotify",
+                            "src": "https://open.spotify.com/track/4G3l5HP6bNBQoYMDBBpAG6+",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=JDR9oF0eKGY",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "youtube",
+                            "src": "https://www.youtube.com/watch?v=HgRDxwHgaQQ",
+                            "DAH_meta": {}
+                        }
+                    ]
+                }
+            }
+        },
+        "M-VGMDB-AR-33857": {
+            "id": "M-VGMDB-AR-33857",
+            "children": {
+                "M-VGMDB-AL-115724": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "AiRBLUE",
+                "DAH_additional_sources": {
+                    "vgmdb": {
+                        "artist": "33857"
+                    },
+                    "urls": [
+                        {
+                            "name": "spotify",
+                            "src": "https://open.spotify.com/artist/49nTLE5U2U3eMoEk1cPOLY",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "fandom",
+                            "src": "https://cue-eng.fandom.com/wiki/AiRBLUE",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "fandom",
+                            "src": "https://cue.fandom.com/wiki/AiRBLUE",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "jpop fandom",
+                            "src": "https://jpop.fandom.com/wiki/AiRBLUE",
+                            "DAH_meta": {}
+                        }
+                    ]
+                }
+            }
+        },
+        "F-VGMDB-11027": {
+            "id": "F-VGMDB-11027",
+            "children": {
+                "A-MAL-1 [null entry]": 0.1,
+                "A-MAL-2 [null entry]": 1,
+                "M-VGMDB-AL-126116": 1,
+                "M-VGMDB-AL-108549": 1,
+                "G-VGMDB-9895": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "Blue Archive",
+                "DAH_additional_sources": {
+                    "urls": [
+                        {
+                            "name": "",
+                            "src": "",
+                            "DAH_meta": {}
+                        },
+                        {
+                            "name": "",
+                            "src": "",
+                            "DAH_meta": {
+                                "a7": ""
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "A-MAL-2 [null entry]": {
+            "id": "A-MAL-2 [null entry]",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "cau thu so 7"
+            }
+        },
+        "M-VGMDB-AL-126116": {
+            "id": "M-VGMDB-AL-126116",
+            "children": {
+                "M-VGMDB-AL-126116-4": 1,
+                "M-VGMDB-AL-126116-24": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "Blue Archive Original Soundtrack Vol.3 ~Reaching for the precious time~"
+            }
+        },
+        "M-VGMDB-AL-126116-4": {
+            "id": "M-VGMDB-AL-126116-4",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "Hifumi Daisuki",
+                "DAH_entry_progress": {
+                    "status": "Completed",
+                    "progress": "PT2M29S"
+                }
+            }
+        },
+        "M-VGMDB-AL-126116-24": {
+            "id": "M-VGMDB-AL-126116-24",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "RE Aoharu",
+                "DAH_entry_progress": {
+                    "status": "Completed",
+                    "progress": "PT2M21S"
+                }
+            }
+        },
+        "M-VGMDB-AL-108549": {
+            "id": "M-VGMDB-AL-108549",
+            "children": {
+                "M-VGMDB-AL-108549-1": 1
+            },
+            "DAH_meta": {
+                "DAH_entry_title": "Clear Morning / Yui Ogura"
+            }
+        },
+        "M-VGMDB-AL-108549-1": {
+            "id": "M-VGMDB-AL-108549-1",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "Clear Morning",
+                "DAH_entry_progress": {
+                    "status": "Completed",
+                    "progress": "PT4M38S"
+                }
+            }
+        },
+        "G-VGMDB-9895": {
+            "id": "G-VGMDB-9895",
+            "children": {},
+            "DAH_meta": {
+                "DAH_entry_title": "Blue Archive"
+            }
+        }
+    },
+    "impacts": [
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                2.1897336161365977,
+                0,
+                0.30309099057083644,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "aei",
+                    "emotionArgs": {
+                        "base": 2.2,
+                        "emotions": {
+                            "ModeratePleasant": 0.9,
+                            "CalmingPleasant": 0.1
+                        }
+                    },
+                    "xeiArgs": {
+                        "factor": 0.2,
+                        "sign": "positive"
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "score": [
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "nei",
+                    "emotionArgs": {
+                        "base": 1,
+                        "emotions": {
+                            "ActivatedPleasant": 1
+                        }
+                    },
+                    "xeiArgs": {
+                        "factor": 0.5,
+                        "sign": "positive"
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.7333333333333334,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "name": "visual",
+                "visualArgs": {
+                    "visualType": "animated",
+                    "base": 0.5,
+                    "unique": 0.2
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-115724": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.18333333333333335,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "name": "visual",
+                "visualArgs": {
+                    "visualType": "albumArt",
+                    "base": 0.5,
+                    "unique": 0.2
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-115724-1": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.7,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.7
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-115724-2": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.4,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.4
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "A-MAL-1 [null entry]": 0.25
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
+            ],
+            "DAH_meta": {}
+        },
+        {
+            "contributors": {
+                "F-VGMDB-11027": 1
+            },
+            "score": [
+                0,
+                2.1363797615108653,
+                0,
+                0,
+                0,
+                3.9866255998823474,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "cry",
+                    "emotionArgs": {
+                        "base": 4,
+                        "emotions": {
+                            "ActivatedPleasant": 0.1,
+                            "CalmingPleasant": 0.2
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-126116": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.20833333333333334,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "name": "visual",
+                "visualArgs": {
+                    "visualType": "albumArt",
+                    "base": 0.5,
+                    "unique": 0.5
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-126116-4": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.3,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.3
+                    }
+                },
+                "DAH_validator_suppress": [
+                    "dah-please-kill-yourself"
+                ]
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-126116-4": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.4,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.4
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-126116-24": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.5
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-108549": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.07666666666666666,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "name": "visual",
+                "visualArgs": {
+                    "visualType": "albumArt",
+                    "base": 0.2,
+                    "unique": 0.3
+                }
+            }
+        },
+        {
+            "contributors": {
+                "M-VGMDB-AL-108549-1": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "music",
+                    "musicArgs": {
+                        "musicBase": 0.5
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "G-VGMDB-9895": 1
+            },
+            "score": [
+                0,
+                1.6,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "nei",
+                    "emotionArgs": {
+                        "base": 1.6,
+                        "emotions": {
+                            "ActivatedPleasant": 1
+                        }
+                    },
+                    "xeiArgs": {
+                        "factor": 0.8,
+                        "sign": "positive"
+                    }
+                }
+            }
+        },
+        {
+            "contributors": {
+                "G-VGMDB-9895": 1
+            },
+            "score": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5833333333333334,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "name": "visual",
+                "visualArgs": {
+                    "visualType": "animatedGachaCardArt",
+                    "base": 0.5,
+                    "unique": 0.5
+                }
+            }
+        },
+        {
+            "contributors": {
+                "F-VGMDB-11027": 1
+            },
+            "score": [
+                0,
+                2.8588320658609274,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "meme",
+                    "emotionArgs": {
+                        "base": 2.8588320658609274,
+                        "emotions": {
+                            "ActivatedPleasant": 1
+                        }
+                    },
+                    "memeArgs": {
+                        "strength": 0.8,
+                        "periods": [
+                            {
+                                "type": "fromto",
+                                "from": "2023-01-01T00:00:00.000+07:00",
+                                "to": "2023-03-30T12:38:48.902+07:00",
+                                "duration": "P3MT12H38M48.902S"
+                            }
+                        ],
+                        "duration": "P3MT12H38M48.902S"
+                    }
+                }
+            }
+        }
+    ],
+    "relations": [
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "references": {
+                "M-VGMDB-AL-115724": {
+                    "kind": "diagonal",
+                    "data": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0.2,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "featureMusic"
+                }
+            }
+        },
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "references": {
+                "F-VGMDB-4499 [null entry]": {
+                    "kind": "diagonal",
+                    "data": [
+                        0.0125,
+                        0.025,
+                        0.0125,
+                        0.025,
+                        0.00625,
+                        0.00625,
+                        0.0125,
+                        0,
+                        0.0125,
+                        0.0125,
+                        0
+                    ]
+                }
+            },
+            "DAH_meta": {
+                "name": "killedBy"
+            }
+        },
+        {
+            "contributors": {
+                "A-MAL-43735": 1
+            },
+            "references": {
+                "F-VGMDB-7059 [null entry]": {
+                    "kind": "diagonal",
+                    "data": [
+                        0.037500000000000006,
+                        0.07500000000000001,
+                        0.037500000000000006,
+                        0.07500000000000001,
+                        0.018750000000000003,
+                        0.018750000000000003,
+                        0.037500000000000006,
+                        0,
+                        0.037500000000000006,
+                        0.037500000000000006,
+                        0
+                    ]
+                }
+            },
+            "DAH_meta": {
+                "name": "killedBy"
+            }
+        },
+        {
+            "contributors": {
+                "G-VGMDB-9895": 1
+            },
+            "references": {
+                "M-VGMDB-AL-126116": {
+                    "kind": "diagonal",
+                    "data": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0.2,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "DAH_meta": {
+                "DAH_ir_source": {
+                    "extension": "DAH_standards",
+                    "version": "1.1.1",
+                    "name": "featureMusic"
+                }
+            }
+        }
+    ],
+    "scores": {
+        "F-VGMDB-9540": {
+            "totalImpact": [
+                0,
+                1,
+                0,
+                2.1897336161365977,
+                0,
+                0.30309099057083644,
+                0,
+                0.7333334732054464,
+                0.8998356231366323,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.1461787282438872,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                1,
+                0,
+                2.1897336161365977,
+                0,
+                0.30309099057083644,
+                0,
+                0.7333334732054464,
+                1.0460143513805196,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 4.027186857369339
+            }
+        },
+        "A-MAL-43735": {
+            "totalImpact": [
+                0,
+                1,
+                0,
+                2.1897336161365977,
+                0,
+                0.30309099057083644,
+                0,
+                0.7333333333333334,
+                0,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.1461787282438872,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                1,
+                0,
+                2.1897336161365977,
+                0,
+                0.30309099057083644,
+                0,
+                0.7333333333333334,
+                0.1461787282438872,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 3.3561946885948886
+            }
+        },
+        "M-VGMDB-AL-115724": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.18333333333333332,
+                0.730893641219436,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.18333333333333332,
+                0.730893641219436,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.8004471018461662
+            }
+        },
+        "M-VGMDB-AL-115724-1": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.7,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.7,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.7
+            }
+        },
+        "M-VGMDB-AL-115724-2": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.4,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.4,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.4
+            }
+        },
+        "M-VGMDB-AR-33857": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.18333333333333332,
+                0.730893641219436,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.18333333333333332,
+                0.730893641219436,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.8004471018461662
+            }
+        },
+        "F-VGMDB-11027": {
+            "totalImpact": [
+                0,
+                3.548992925150879,
+                0,
+                0,
+                0,
+                3.9866255998823474,
+                0,
+                0.5833353028046652,
+                0.6703645086523488,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.11636824939177713,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                3.548992925150879,
+                0,
+                0,
+                0,
+                3.9866255998823474,
+                0,
+                0.5833353028046652,
+                0.7867327580441259,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 6.835449996497213
+            }
+        },
+        "A-MAL-2 [null entry]": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0
+            }
+        },
+        "M-VGMDB-AL-126116": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.20833333333333331,
+                0.5818412469588856,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.20833333333333331,
+                0.5818412469588856,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.6727868408122328
+            }
+        },
+        "M-VGMDB-AL-126116-4": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.44089461904354743,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.44089461904354743,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.44089461904354743
+            }
+        },
+        "M-VGMDB-AL-126116-24": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.5
+            }
+        },
+        "M-VGMDB-AL-108549": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.07666666666666665,
+                0.5,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.07666666666666665,
+                0.5,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.5237862448680717
+            }
+        },
+        "M-VGMDB-AL-108549-1": {
+            "totalImpact": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 0.5
+            }
+        },
+        "G-VGMDB-9895": {
+            "totalImpact": [
+                0,
+                1.6,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5833333333333334,
+                0,
+                0,
+                0
+            ],
+            "totalRelation": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.11636824939177713,
+                0,
+                0
+            ],
+            "overallVector": [
+                0,
+                1.6,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.5833333333333334,
+                0.11636824939177713,
+                0,
+                0
+            ],
+            "DAH_meta": {
+                "DAH_overall_score": 2.223568535803909
+            }
+        }
+    }
+}

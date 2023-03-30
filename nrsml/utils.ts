@@ -61,3 +61,38 @@ export function standardBuilder(): XMLBuilder {
             suppressEmptyNode: true,
         }));
 }
+
+export function isObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && !Array.isArray(value) && value !== null;
+}
+
+export function isElement<S extends string>(
+    node: unknown,
+    name: S
+): node is Record<string, unknown> & { S: unknown } {
+    return isObject(node) && name in node;
+}
+
+export function assert(condition: boolean, msg?: string): asserts condition {
+    if (!condition) {
+        throw new Error(msg);
+    }
+}
+
+export function deepFreeze(object: unknown) {
+    // Retrieve the property names defined on object
+    // deno-lint-ignore ban-types
+    const propNames = Reflect.ownKeys(object as object);
+
+    // Freeze properties before freezing self
+    for (const name of propNames) {
+        // deno-lint-ignore no-explicit-any
+        const value = (object as any)[name];
+
+        if ((value && typeof value === "object") || typeof value === "function") {
+            deepFreeze(value as Record<string | symbol, unknown>);
+        }
+    }
+
+    return Object.freeze(object);
+}

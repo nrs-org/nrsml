@@ -1,61 +1,1330 @@
-import { NRSMLData } from "./data.ts";
-import { XMLParser } from "npm:fast-xml-parser@4";
+import { Macro, substituteMacro } from "./macro.ts";
+import { assert, deepFreeze, isElement, isObject, standardParser } from "./utils.ts";
 
-type PlainObject = Record<string, unknown>;
+import {
+    Data,
+    Entry,
+    Impact,
+    Relation,
+    HasMeta,
+    Vector,
+    Context,
+    newZeroVector,
+    FactorScore,
+    AU,
+    AP,
+    CP,
+    CU,
+    MP,
+    MU,
+    Additional,
+    AL,
+    AM,
+    AV,
+    Boredom,
+    WeightedEmotions,
+    EmotionFactor,
+    DatePeriod,
+    Sign,
+    VisualType,
+    EntryStatus,
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/48e89a81959bf839d9d25e1673c4a760c05e22af/mod.ts";
+// @deno-types="npm:@types/luxon"
+import { DateTime, Duration } from "npm:luxon@3.2.0";
 
-export function processNRSXML(content: string): NRSMLData {
-  const document = new XMLParser({
-    allowBooleanAttributes: true,
-    ignoreAttributes: false,
-    ignoreDeclaration: false,
-    preserveOrder: true,
-  }).parse(content);
+type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
 
-  // parsed document should be an object
-  assert(document instanceof Object);
-  return load(document);
+interface Document {
+    data: Data;
 }
 
-function assert(condition: boolean, msg?: string): asserts condition {
-  if (!condition) {
-    throw new Error(msg);
-  }
+export interface ProcessOptions {
+    today?: DateTime;
+    includeResolver?(path: string): [string, ProcessOptions] | undefined;
+    scriptResolver?(path: string): string | undefined;
+    rootScope?: DocumentScope;
+    // deno-lint-ignore no-explicit-any
+    ignoreNodes?: any[];
+    freeze?: boolean;
 }
 
-type Node = Text | Element;
-
-interface Text {
-    type: "text";
-    text: string;
+interface DocumentScope {
+    type: "document";
+    context: Context;
+    value: Document;
+    root: DocumentScope;
+    entry: undefined;
+    config: Required<Omit<ProcessOptions, "rootScope" | "freeze">> & ProcessOptions;
+    // deno-lint-ignore no-explicit-any
+    global: any;
+    // deno-lint-ignore no-explicit-any
+    local: any;
+    macros: Map<string, Macro>;
 }
 
-interface Element {
-    type: "element";
-    name: string;
-    attributes: Map<string, string>;
-    children: Node[];
+interface EntryScope {
+    type: "entry";
+    root: DocumentScope;
+    entry: EntryScope;
+    parent: DocumentScope | ContainsScope | EntryScope;
+    value: Entry;
+    // deno-lint-ignore no-explicit-any
+    local: any;
+    multipliedFactor: 1.0;
+    macros: Map<string, Macro>;
 }
 
-function load(document: PlainObject): NRSMLData {
-    const data: NRSMLData = {};
-    
+interface ImpactScope {
+    type: "impact";
+    root: DocumentScope;
+    entry: EntryScope | undefined;
+    parent: DocumentScope | ContainsScope | EntryScope;
+    value: Impact[];
+    // deno-lint-ignore no-explicit-any
+    local: any;
+    macros: Map<string, Macro>;
 }
 
-function 
+interface RelationScope {
+    type: "relation";
+    root: DocumentScope;
+    entry: EntryScope | undefined;
+    parent: DocumentScope | ContainsScope | EntryScope;
+    value: Relation[];
+    // deno-lint-ignore no-explicit-any
+    local: any;
+    macros: Map<string, Macro>;
+}
 
-function transform(document: PlainObject): NRSMLData {
-  interface DocumentNode extends PlainObject {
-    document: unknown,
-  }
+interface ContainsScope {
+    type: "contains";
+    root: DocumentScope;
+    entry: EntryScope;
+    parent: EntryScope | ContainsScope;
+    factor: number;
+    multipliedFactor: number;
+    // deno-lint-ignore no-explicit-any
+    local: any;
+    macros: Map<string, Macro>;
+}
 
-  const documentNodes = Object.values(document).filter(
-    (node): node is DocumentNode => node instanceof Object && "document" in node
-  );
-  
-  // one xml file must only have one document element
-  assert(documentNodes.length === 1);
+interface URLScope {
+    value: HasMeta;
+}
 
-  const documentNode = documentNodes[0];
-  console.debug(documentNode);
-  return {};
+export interface Result {
+    nrsData: Data;
+    xmlModel: unknown;
+}
+
+export function processNRSXML(
+    context: Context,
+    content: string,
+    options: ProcessOptions = {}
+): Result {
+    return processRoot(context, standardParser().parse(content), options);
+}
+
+function processRoot(context: Context, document: unknown, options: ProcessOptions): Result {
+    if (options.freeze ?? true) {
+        document = deepFreeze(document);
+    }
+    const partialScope: Partial<DocumentScope> = {
+        type: "document",
+        value: {
+            data: {
+                entries: new Map(),
+                impacts: [],
+                relations: [],
+            },
+        },
+        context,
+        config: {
+            today: DateTime.now(),
+            includeResolver: () => undefined,
+            scriptResolver: () => undefined,
+            rootScope: null!,
+            ignoreNodes: [],
+            freeze: false,
+            ...options,
+        },
+        root: options.rootScope,
+        global: options.rootScope?.global ?? {},
+        local: {},
+    };
+
+    if (partialScope.global === undefined) {
+        partialScope.global = partialScope.local;
+    }
+
+    if (partialScope.root === undefined) {
+        partialScope.root = partialScope as DocumentScope;
+    }
+    const scope = partialScope as DocumentScope;
+    assert(document instanceof Array);
+    const documentNodes = document as Array<unknown>;
+    for (const node of documentNodes) {
+        if (processDocument(scope, node)) {
+            continue;
+        }
+
+        scope.config.ignoreNodes.push(node);
+    }
+
+    return {
+        nrsData: scope.value.data,
+        xmlModel: document,
+    };
+}
+
+function processDocument(scope: DocumentScope, node: unknown): boolean {
+    if (!isObject(node) || !("document" in node)) {
+        return false;
+    }
+
+    const documentNodes = node["document"] as Array<unknown>;
+    for (const node of documentNodes) {
+        if (!processDirective(scope, node) && !processInclude(scope, node)) {
+            scope.config.ignoreNodes.push(node);
+        }
+    }
+
+    return true;
+}
+
+function processDirective(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    if (isElement(node, "def")) {
+        // already preprocessed
+        return true;
+    }
+
+    const pending = [node];
+    const directives = [];
+    while (pending.length > 0) {
+        const node = pending.shift();
+        const expandedMacro = processReference(scope, node);
+        if (expandedMacro === undefined) {
+            directives.push(node);
+        } else {
+            pending.push(...expandedMacro);
+        }
+    }
+    for (const directive of directives) {
+        const result = processSimpleDirective(scope, directive);
+        if (directives.length == 1) {
+            return result;
+        }
+    }
+
+    return true;
+}
+
+function processSimpleDirective(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return (
+        processEntry(scope, node) ||
+        processImpact(scope, node) ||
+        processRelation(scope, node) ||
+        processScript(scope, node)
+    );
+}
+
+function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    if (!(isObject(node) && "entry" in node)) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    const entry: Entry = {
+        id: transformId(scope, attrs["id"]!),
+        children: new Map(),
+        DAH_meta: {
+            DAH_entry_title: attrs["title"]!,
+        },
+    };
+
+    if ("multipliedFactor" in scope) {
+        const children = scope.entry.value.children;
+        children.set(
+            entry.id,
+            Math.min(1.0, (children.get(entry.id) ?? 0.0) + scope.multipliedFactor)
+        );
+    }
+
+    const partialEntryScope: Partial<EntryScope> = {
+        parent: scope,
+        root: scope.root,
+        type: "entry",
+        value: entry,
+        multipliedFactor: 1.0,
+        local: { ...scope.local },
+        macros: new Map(scope.macros),
+    };
+
+    partialEntryScope.entry = partialEntryScope as EntryScope;
+    const entryScope = partialEntryScope as EntryScope;
+    scope.root.value.data.entries.set(entry.id, entry);
+
+    const childNodes = node["entry"] as Array<unknown>;
+    preprocessMacros(entryScope.macros, childNodes);
+    for (const childNode of childNodes) {
+        if (
+            !processDirective(entryScope, childNode) &&
+            !processEntryMeta(entryScope, childNode) &&
+            !processCommonMeta(entryScope, childNode) &&
+            !processContains(entryScope, childNode)
+        ) {
+            scope.root.config.ignoreNodes.push(childNode);
+        }
+    }
+
+    return true;
+}
+
+function processImpact(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    // or better: use a lookup table
+    const processes = [
+        processRegularImpact,
+        processCry,
+        processPADS,
+        processMaxAEIPADS,
+        processCryPADS,
+        processNEI,
+        processAEI,
+        processWaifu,
+        processEHI,
+        processEPI,
+        processJumpscare,
+        processSleeplessNight,
+        processPolitics,
+        processInterestField,
+        processConsumed,
+        processDropped,
+        processMeme,
+        processMusic,
+        processAdditional,
+        processVisual,
+        processOsuSong,
+    ];
+
+    for (const process of processes) {
+        if (process(scope, node)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function processImpactBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    impactInitCallbacks?: (
+        attributes: Record<string, string>,
+        childNodes: Array<unknown>
+    ) => Impact[],
+    childNodeCallback?: (impactScope: ImpactScope, childNode: unknown) => boolean
+): boolean {
+    if (!isElement(node, name)) {
+        return false;
+    }
+
+    childNodeCallback = childNodeCallback ?? (() => false);
+    impactInitCallbacks =
+        impactInitCallbacks ??
+        (() => {
+            return [
+                {
+                    contributors: new Map(),
+                    score: newZeroVector(scope.root.context),
+                    DAH_meta: {},
+                },
+            ];
+        });
+
+    const childNodes = node[name] as Array<unknown>;
+    const impacts = impactInitCallbacks(getAttributes(node), childNodes);
+    const impactScope: ImpactScope = {
+        type: "impact",
+        parent: scope,
+        entry: scope.entry,
+        root: scope.root,
+        value: impacts,
+        local: { ...scope.local },
+        macros: new Map(scope.macros),
+    };
+
+    preprocessMacros(impactScope.macros, childNodes);
+    for (const childNode of childNodes) {
+        if (isElement(childNode, "contributor")) {
+            const attrs = getAttributes(childNode);
+            const id = transformId(scope, attrs["id"]!);
+            const factor = parseFloat(attrs["factor"]);
+
+            for (const impact of impacts) {
+                impact.contributors.set(
+                    id,
+                    Math.min(1.0, (impact.contributors.get(id) ?? 0.0) + factor)
+                );
+            }
+        } else if (
+            !processScript(impactScope, childNode) &&
+            !processCommonMeta(impactScope, childNode) &&
+            !processImpactMeta(impactScope, childNode) &&
+            !childNodeCallback(impactScope, childNode)
+        ) {
+            scope.root.config.ignoreNodes.push(childNode);
+        }
+    }
+
+    for (const impact of impacts) {
+        scope.root.value.data.impacts.push(impact);
+        if (impact.contributors.size == 0) {
+            if (scope.entry !== undefined) {
+                impact.contributors.set(scope.entry.value.id, 1.0);
+            }
+        }
+    }
+
+    return true;
+}
+
+function processRegularImpact(scope: DocumentScope | EntryScope | ContainsScope, node: unknown) {
+    return processImpactBase(scope, node, "regularImpact", undefined, (impactScope, childNode) => {
+        const score = processScore(impactScope, childNode);
+        if (score !== undefined) {
+            impactScope.value[0].score = score;
+        }
+
+        return score !== undefined;
+    });
+}
+
+function processScore(scope: Scope, node: unknown): Vector | undefined {
+    if (!isElement(node, "score")) {
+        return undefined;
+    }
+
+    const vector =
+        getAttributes(node)["vector"]?.split(",")?.map(parseFloat) ??
+        newZeroVector(scope.root.context);
+    for (const childNode of node["score"] as Array<unknown>) {
+        if (!isElement(childNode, "component")) {
+            scope.root.config.ignoreNodes.push(childNode);
+            continue;
+        }
+
+        const attrs = getAttributes(childNode);
+        const value = parseFloat(attrs["value"]!);
+        const factor = parseFactor(attrs["factor"]!)!;
+        vector[factor.factorIndex] = value;
+    }
+
+    return vector;
+}
+
+function processCry(scope: DocumentScope | EntryScope | ContainsScope, node: unknown) {
+    return processEmotionImpactBase(scope, node, "cry", (emotions) => [
+        scope.root.context.extensions.DAH_standards!.cry(scope.root.context, new Map(), emotions),
+    ]);
+}
+
+function processEmotionImpactBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    impactInitCallbacks: (
+        emotions: WeightedEmotions,
+        attributes: Record<string, string>
+    ) => Impact[],
+    childNodeCallback?: (impactScope: ImpactScope, childNode: unknown) => boolean
+) {
+    return processImpactBase(
+        scope,
+        node,
+        name,
+        (attrs) => impactInitCallbacks(parseEmotions(attrs["emotions"]!), attrs),
+        childNodeCallback
+    );
+}
+
+function processBaseScoredEmotionImpactBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    impactInitCallbacks: (
+        base: number,
+        emotions: WeightedEmotions,
+        attributes: Record<string, string>
+    ) => Impact
+) {
+    return processEmotionImpactBase(scope, node, name, (emotions, attrs) => [
+        impactInitCallbacks(parseFloat(attrs["base"]!), emotions, attrs),
+    ]);
+}
+
+function processLengthImpactBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    impactInitCallbacks: (
+        periods: DatePeriod[],
+        attrs: Record<string, string>,
+        children: Array<unknown>
+    ) => Impact[]
+) {
+    return processImpactBase(scope, node, name, (attrs, children) => {
+        const periods = ((): DatePeriod[] => {
+            if (("from" in attrs && "to" in attrs) || "length" in attrs) {
+                return [parsePeriod(scope, node)!];
+            } else {
+                return children
+                    .filter((childNode) => isElement(childNode, "period"))
+                    .map((p) => parsePeriod(scope, p)!);
+            }
+        })();
+
+        return impactInitCallbacks(periods, attrs, children);
+    });
+}
+
+function processLengthEmotionImpactBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    impactInitCallbacks: (
+        emotions: WeightedEmotions,
+        periods: DatePeriod[],
+        attrs: Record<string, string>,
+        children: Array<unknown>
+    ) => Impact[]
+) {
+    return processLengthImpactBase(scope, node, name, (periods, attrs, children) =>
+        impactInitCallbacks(parseEmotions(attrs["emotions"]!), periods, attrs, children)
+    );
+}
+
+function processPADS(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processLengthEmotionImpactBase(scope, node, "pads", (emotions, periods) => [
+        scope.root.context.extensions.DAH_standards!.pads(
+            scope.root.context,
+            new Map(),
+            periods,
+            emotions
+        ),
+    ]);
+}
+
+function processMaxAEIPADS(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processLengthEmotionImpactBase(scope, node, "maxAEIPADS", (emotions, periods) =>
+        scope.root.context.extensions.DAH_standards!.maxAEIPADS(
+            scope.root.context,
+            new Map(),
+            periods,
+            emotions
+        )
+    );
+}
+
+function processCryPADS(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processLengthEmotionImpactBase(scope, node, "cryPADS", (emotions, periods) =>
+        scope.root.context.extensions.DAH_standards!.maxAEIPADS(
+            scope.root.context,
+            new Map(),
+            periods,
+            emotions
+        )
+    );
+}
+
+function processAEI(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processBaseScoredEmotionImpactBase(scope, node, "aei", (base, emotions) =>
+        scope.root.context.extensions.DAH_standards!.aei(
+            scope.root.context,
+            new Map(),
+            base,
+            base >= 0.0 ? Sign.Positive : Sign.Negative,
+            emotions
+        )
+    );
+}
+
+function processNEI(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processBaseScoredEmotionImpactBase(scope, node, "nei", (base, emotions) =>
+        scope.root.context.extensions.DAH_standards!.nei(
+            scope.root.context,
+            new Map(),
+            base,
+            base >= 0.0 ? Sign.Positive : Sign.Negative,
+            emotions
+        )
+    );
+}
+
+function processWaifu(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processLengthImpactBase(scope, node, "waifu", (periods, attrs) => [
+        scope.root.context.extensions.DAH_standards!.waifu(
+            scope.root.context,
+            new Map(),
+            attrs["name"]!,
+            periods
+        ),
+    ]);
+}
+
+function processEHI(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "ehi", () => [
+        scope.root.context.extensions.DAH_standards!.ehi(scope.root.context, new Map()),
+    ]);
+}
+
+function processEPI(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "epi", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.epi(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["base"]!)
+        ),
+    ]);
+}
+
+function processJumpscare(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "jumpscare", () => [
+        scope.root.context.extensions.DAH_standards!.jumpscare(scope.root.context, new Map()),
+    ]);
+}
+
+function processSleeplessNight(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "sleeplessNight", () => [
+        scope.root.context.extensions.DAH_standards!.sleeplessNight(scope.root.context, new Map()),
+    ]);
+}
+
+function processPolitics(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "politics", () => [
+        scope.root.context.extensions.DAH_standards!.politics(scope.root.context, new Map()),
+    ]);
+}
+
+function processInterestField(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "interestField", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.interestField(
+            scope.root.context,
+            new Map(),
+            attrs["new"] === "true"
+        ),
+    ]);
+}
+
+function processConsumed(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "consumed", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.consumed(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["boredom"]),
+            parseDuration(attrs["length"])
+        ),
+    ]);
+}
+
+function processDropped(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "dropped", () => [
+        scope.root.context.extensions.DAH_standards!.dropped(scope.root.context, new Map()),
+    ]);
+}
+
+function processMeme(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processLengthImpactBase(scope, node, "meme", (periods, attrs) => [
+        scope.root.context.extensions.DAH_standards!.meme(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["strength"]!),
+            periods
+        ),
+    ]);
+}
+
+function processMusic(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "music", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.music(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["base"]!)
+        ),
+    ]);
+}
+
+function processAdditional(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processImpactBase(scope, node, "additional", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.additional(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["value"]!),
+            attrs["note"] ?? ""
+        ),
+    ]);
+}
+
+function processVisual(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "visual", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.visual(
+            scope.root.context,
+            new Map(),
+            parseVisualType(attrs["type"]!)!,
+            parseFloat(attrs["base"]),
+            parseFloat(attrs["unique"])
+        ),
+    ]);
+}
+
+function processOsuSong(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "osuSong", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.osuSong(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["personal"] ?? "0.0"),
+            parseFloat(attrs["community"] ?? "0.0")
+        ),
+    ]);
+}
+
+function processRelationBase<S extends string>(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown,
+    name: S,
+    relationInitCallbacks?: (
+        attributes: Record<string, string>,
+        childNodes: Array<unknown>
+    ) => Relation[],
+    childNodeCallback?: (relationScope: RelationScope, childNode: unknown) => boolean
+): boolean {
+    if (!isElement(node, name)) {
+        return false;
+    }
+
+    childNodeCallback = childNodeCallback ?? (() => false);
+    relationInitCallbacks =
+        relationInitCallbacks ??
+        (() => {
+            return [
+                {
+                    contributors: new Map(),
+                    references: new Map(),
+                    DAH_meta: {},
+                },
+            ];
+        });
+
+    const childNodes = node[name] as Array<unknown>;
+    const relations = relationInitCallbacks(getAttributes(node), childNodes);
+    const relationScope: RelationScope = {
+        type: "relation",
+        parent: scope,
+        entry: scope.entry,
+        root: scope.root,
+        value: relations,
+        local: { ...scope.local },
+        macros: new Map(scope.macros),
+    };
+
+    preprocessMacros(relationScope.macros, childNodes);
+    for (const childNode of childNodes) {
+        if (isElement(childNode, "contributor")) {
+            const attrs = getAttributes(childNode);
+            const id = transformId(scope, attrs["id"]!);
+            const factor = parseFloat(attrs["factor"]);
+
+            for (const impact of relations) {
+                impact.contributors.set(
+                    id,
+                    Math.min(1.0, (impact.contributors.get(id) ?? 0.0) + factor)
+                );
+            }
+        } else if (
+            !processScript(relationScope, childNode) &&
+            !processCommonMeta(relationScope, childNode) &&
+            !processRelationMeta(relationScope, childNode) &&
+            !childNodeCallback(relationScope, childNode)
+        ) {
+            scope.root.config.ignoreNodes.push(childNode);
+        }
+    }
+
+    for (const relation of relations) {
+        scope.root.value.data.relations.push(relation);
+        if (relation.contributors.size == 0) {
+            if (scope.entry !== undefined) {
+                relation.contributors.set(scope.entry.value.id, 1.0);
+            }
+        }
+    }
+
+    return true;
+}
+
+function processRemix(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processRelationBase(scope, node, "remix", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.remix(
+            scope.root.context,
+            new Map(),
+            transformId(scope, attrs["id"]!)
+        ),
+    ]);
+}
+
+function processFeatureMusic(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processRelationBase(scope, node, "featureMusic", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.featureMusic(
+            scope.root.context,
+            new Map(),
+            transformId(scope, attrs["id"]!)
+        ),
+    ]);
+}
+
+function processKilledBy(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return processRelationBase(scope, node, "killedBy", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.killedBy(
+            scope.root.context,
+            new Map(),
+            transformId(scope, attrs["id"]!),
+            parseFloat(attrs["potential"]),
+            parseFloat(attrs["effect"])
+        ),
+    ]);
+}
+
+function parseVisualType(visualType: string): VisualType | undefined {
+    return {
+        animated: VisualType.Animated,
+        rpg3DGame: VisualType.RPG3DGame,
+        animatedShort: VisualType.AnimatedShort,
+        animatedMV: VisualType.AnimatedMV,
+        visualNovel: VisualType.VisualNovel,
+        manga: VisualType.Manga,
+        animatedGachaCardArt: VisualType.AnimatedGachaCardArt,
+        gachaCardArt: VisualType.GachaCardArt,
+        lightNovel: VisualType.LightNovel,
+        semiAnimatedMV: VisualType.SemiAnimatedMV,
+        staticMV: VisualType.StaticMV,
+        albumArt: VisualType.AlbumArt,
+    }[visualType];
+}
+
+function parseDuration(duration: string): Duration {
+    const [seconds, minutes, hours] = duration
+        .split(":")
+        .reverse()
+        .map((x) => parseInt(x));
+    return Duration.fromObject({ hours, minutes, seconds });
+}
+
+function parsePeriod(scope: Scope, node: unknown): DatePeriod | undefined {
+    const attrs = getAttributes(node);
+    if ("from" in attrs && "to" in attrs) {
+        const from = parseDate(scope, attrs["from"]);
+        const to = parseDate(scope, attrs["to"]);
+        return {
+            type: "fromto",
+            from,
+            to,
+        };
+    } else if ("length" in attrs) {
+        return {
+            type: "duration",
+            length: Duration.fromObject({ days: parseInt(attrs["length"]) }),
+        };
+    }
+
+    return undefined;
+}
+
+function parseDate(scope: Scope, dateString: string): DateTime {
+    if (dateString === "today") {
+        return scope.root.config.today;
+    } else if(dateString.startsWith("epoch")) {
+        const offset = parseInt(dateString.substring(6));
+        return DateTime.fromSeconds(offset * 86400);
+    } else {
+        return DateTime.fromISO(dateString);
+    }
+}
+
+function parseEmotions(emotions: string): WeightedEmotions {
+    if (emotions.length === 2) {
+        return [[parseEmotion(emotions)!, 1.0]];
+    }
+
+    return emotions
+        .split(":")
+        .map((token) => token.split("-"))
+        .map(([emotion, factor]) => [parseEmotion(emotion)!, parseFloat(factor)]);
+}
+
+function parseEmotion(emotion: string): EmotionFactor | undefined {
+    const map: Record<string, EmotionFactor> = {
+        AP: AP,
+        AU: AU,
+        MP: MP,
+        MU: MU,
+        CP: CP,
+        CU: CU,
+    };
+
+    return map[emotion];
+}
+
+function parseFactor(name: string): FactorScore | undefined {
+    return {
+        "Emotion.AU": AU,
+        "Emotion.AP": AP,
+        "Emotion.MU": MU,
+        "Emotion.MP": MP,
+        "Emotion.CU": CU,
+        "Emotion.CP": CP,
+        "Art.Language": AL,
+        "Art.Visual": AV,
+        "Art.Music": AM,
+        Boredom: Boredom,
+        Additional: Additional,
+    }[name];
+}
+
+function processRelation(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    return (
+        processRemix(scope, node) ||
+        processFeatureMusic(scope, node) ||
+        processKilledBy(scope, node)
+    );
+}
+
+function processContains(scope: EntryScope | ContainsScope, node: unknown): boolean {
+    if (!isElement(node, "contains")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    const factor = parseFloat(attrs["factor"] ?? "1.0");
+    let id = attrs["id"];
+    if (id !== undefined) {
+        id = transformId(scope, id);
+        scope.entry.value.children.set(id, factor);
+    }
+
+    const containsScope: ContainsScope = {
+        type: "contains",
+        parent: scope,
+        entry: scope.entry,
+        root: scope.root,
+        factor,
+        multipliedFactor: scope.multipliedFactor * factor,
+        local: { ...scope.local },
+        macros: new Map(scope.macros),
+    };
+
+    let warned = false;
+
+    const childNodes = node["contains"] as Array<unknown>;
+    preprocessMacros(containsScope.macros, childNodes);
+    for (const childNode of childNodes) {
+        if (
+            processDirective(containsScope, childNode) ||
+            processContains(containsScope, childNode)
+        ) {
+            if (id !== undefined && !warned) {
+                console.warn(
+                    "the `id` attribute of `contains` elements should only be used in the simple context" +
+                        " (no child elements should be processed this way), but child elements were found." +
+                        " Fallback behavior: respect both child elements and the id attribute" +
+                        " (this may not work in the future)."
+                );
+                warned = true;
+            }
+        } else {
+            scope.root.config.ignoreNodes.push(childNode);
+        }
+    }
+
+    return true;
+}
+
+// expand the macro, if this is not a `ref` element, return undefined
+function processReference(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): unknown[] | undefined {
+    if (!(isObject(node) && "ref" in node)) {
+        return undefined;
+    }
+
+    const attrs = getAttributes(node);
+    const name = attrs["name"]!;
+    const macro = scope.macros.get(name);
+    if (macro === undefined) {
+        console.warn(`macro ${name} not found`);
+        return undefined;
+    }
+
+    delete attrs["name"];
+    return substituteMacro(macro, new Map(Object.entries(attrs)));
+}
+
+// scripts too
+function processScript(
+    scope: DocumentScope | EntryScope | ContainsScope | ImpactScope | RelationScope,
+    node: unknown
+): boolean {
+    if (!isElement(node, "script")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    if ("src" in attrs) {
+        const src = attrs["src"];
+        const script = scope.root.config.scriptResolver(src);
+        if (script === undefined) {
+            return false;
+        }
+        executeScript(scope, script, attrs["entryPoint"]);
+    } else {
+        const script = (node["script"] as unknown[])
+            .flatMap((node) => (isElement(node, "#text") ? [node["#text"] as string] : []))
+            .join("\n");
+        executeScript(scope, script, attrs["entryPoint"]);
+    }
+
+    return true;
+}
+
+function executeScript(scope: Scope, script: string, entryPoint: string | undefined): void {
+    new Function("global", "local", "scope", script).apply(scope, [scope.root.global, scope.local]);
+    if (entryPoint !== undefined) {
+        scope.local[entryPoint]();
+    }
+}
+
+function processEntryMeta(scope: EntryScope, node: unknown): boolean {
+    return (
+        processSource(scope, node) ||
+        processProgress(scope, node) ||
+        processAnimeProgress(scope, node) ||
+        processConsumedProgress(scope, node) ||
+        processAnimeConsumedProgress(scope, node) ||
+        processMusicConsumedProgress(scope, node) ||
+        processBestGirl(scope, node)
+    );
+}
+
+function processSource(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "source")) {
+        return false;
+    }
+    const childNodes = node["source"] as Array<unknown>;
+    const DAH_additional_sources: Record<string, unknown> = {};
+    scope.value.DAH_meta["DAH_additional_sources"] = DAH_additional_sources;
+
+    outer: for (const childNode of childNodes) {
+        if (!isObject(childNode)) {
+            scope.root.config.ignoreNodes.push(childNode);
+            continue;
+        }
+
+        const simpleDatabases = {
+            mal: "id_MyAnimeList",
+            al: "id_AniList",
+            adb: "id_AniDB",
+            ks: "id_Kitsu",
+            vndb: "id_VNDB",
+        };
+        for (const [attrKey, metaKey] of Object.entries(simpleDatabases)) {
+            if (attrKey in childNode) {
+                DAH_additional_sources[metaKey] = parseInt(getAttributes(childNode)["id"]!);
+                continue outer;
+            }
+        }
+
+        if ("vgmdb" in childNode) {
+            DAH_additional_sources["vgmdb"] = getAttributes(childNode);
+        } else if ("urls" in childNode) {
+            const urlObjects = (DAH_additional_sources["urls"] ??= []) as Array<unknown>;
+
+            for (const urlNode of childNode["urls"] as Array<unknown>) {
+                if (!isElement(urlNode, "url")) {
+                    scope.root.config.ignoreNodes.push(urlNode);
+                    continue;
+                }
+                const attrs = getAttributes(urlNode);
+                const urlScope: URLScope = {
+                    value: {
+                        DAH_meta: {},
+                    },
+                };
+                for (const metaNode of urlNode["url"] as Array<unknown>) {
+                    if (!processMeta(urlScope, metaNode)) {
+                        scope.root.config.ignoreNodes.push(metaNode);
+                    }
+                }
+
+                const urlObject = {
+                    ...attrs,
+                    ...urlScope.value,
+                };
+
+                urlObjects.push(urlObject);
+            }
+        } else {
+            scope.root.config.ignoreNodes.push(childNode);
+        }
+    }
+
+    return true;
+}
+
+function processProgress(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "progress")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    scope.root.context.extensions.DAH_entry_progress!.progress(
+        scope.root.context,
+        scope.value,
+        parseStatus(attrs["status"]!)!,
+        parseDuration(attrs["length"]!)!
+    );
+    return true;
+}
+
+function processAnimeProgress(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "animeProgress")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    scope.root.context.extensions.DAH_entry_progress!.animeProgress(
+        scope.root.context,
+        scope.value,
+        parseStatus(attrs["status"]!)!,
+        parseInt(attrs["episodes"]),
+        parseDuration(attrs["episodeDuration"]!)!
+    );
+    return true;
+}
+
+function processConsumedProgress(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "consumedProgress")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    scope.root.context.extensions.DAH_entry_progress!.consumedProgress(
+        scope.root.context,
+        scope.value,
+        parseStatus(attrs["status"]!)!,
+        parseFloat(attrs["boredom"]!)!,
+        parseDuration(attrs["duration"]!)!
+    );
+    return true;
+}
+
+function processAnimeConsumedProgress(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "animeConsumedProgress")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    scope.root.context.extensions.DAH_entry_progress!.animeConsumedProgress(
+        scope.root.context,
+        scope.value,
+        parseStatus(attrs["status"]!)!,
+        parseInt(attrs["episodes"]),
+        parseDuration(attrs["episodeDuration"] ?? "20:00")
+    );
+    return true;
+}
+
+function processMusicConsumedProgress(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "musicConsumedProgress")) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    scope.root.context.extensions.DAH_entry_progress!.musicConsumedProgress(
+        scope.root.context,
+        scope.value,
+        parseDuration(attrs["length"]!)!
+    );
+    return true;
+}
+
+function processBestGirl(scope: EntryScope, node: unknown): boolean {
+    if (!isElement(node, "bestGirl")) {
+        return false;
+    }
+
+    const bestGirl = getAttributes(node)["name"]!;
+    scope.value.DAH_meta["DAH_entry_bestGirl"] = bestGirl;
+    return true;
+}
+
+function parseStatus(statusString: string): EntryStatus | undefined {
+    return statusString as EntryStatus;
+}
+
+function processImpactMeta(_scope: ImpactScope, _node: unknown): boolean {
+    return false;
+}
+
+function processRelationMeta(_scope: RelationScope, _node: unknown): boolean {
+    return false;
+}
+
+function processCommonMeta(
+    scope: EntryScope | ImpactScope | RelationScope,
+    node: unknown
+): boolean {
+    return processMeta(scope, node) || processValidatorSuppress(scope, node);
+    // scope.value.DAH_meta
+}
+
+function preprocessMacros(macros: Map<string, Macro>, childNodes: unknown[]) {
+    for (const node of childNodes) {
+        if (!isElement(node, "def")) {
+            continue;
+        }
+        const attrs = getAttributes(node);
+        const name = attrs["name"];
+        const variables = attrs["vars"]
+            .split(",")
+            .map((x) => x.trim())
+            .map((x) => x.split(":")[0]);
+        macros.set(name, {
+            name,
+            variables,
+            template: node["def"] as unknown[],
+        });
+    }
+}
+
+// only supporting one-layer meta for now
+
+function setMeta(
+    scope: EntryScope | ImpactScope | RelationScope | URLScope,
+    key: string,
+    value: unknown
+) {
+    if (Array.isArray(scope.value)) {
+        scope.value.forEach((ir) => (ir.DAH_meta[key] = value));
+    } else {
+        scope.value.DAH_meta[key] = value;
+    }
+}
+
+function processMeta(
+    scope: EntryScope | ImpactScope | RelationScope | URLScope,
+    node: unknown
+): boolean {
+    if (!(isObject(node) && "meta" in node)) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    const key = attrs["key"]!;
+    const value = attrs["value"]!;
+    setMeta(scope, key, value);
+    return true;
+}
+
+function processValidatorSuppress(
+    scope: EntryScope | ImpactScope | RelationScope,
+    node: unknown
+): boolean {
+    if (!(isObject(node) && "validatorSuppress" in node)) {
+        return false;
+    }
+
+    const rules = getAttributes(node)["rules"]!.split(";");
+    setMeta(scope, "DAH_validator_suppress", rules);
+    return true;
+}
+
+function processInclude(scope: DocumentScope, node: unknown): boolean {
+    if (!(isObject(node) && "include" in node)) {
+        return false;
+    }
+
+    const attrs = getAttributes(node);
+    const src = attrs["src"];
+
+    if (src !== undefined) {
+        const included = scope.root.config.includeResolver(src);
+        if (included === undefined) {
+            return true;
+        }
+
+        const [includedContent, includedOptions] = included;
+        const { nrsData } = processNRSXML(scope.context, includedContent, includedOptions);
+        const data = scope.value.data;
+        nrsData.entries.forEach((value, key) => data.entries.set(key, value));
+        nrsData.impacts.forEach((x) => data.impacts.push(x));
+        nrsData.relations.forEach((x) => data.relations.push(x));
+    }
+
+    return true;
+}
+
+function getAttributes(node: unknown): Record<string, string> {
+    const rawAttrs = (() => {
+        if (isObject(node)) {
+            return (node[":@"] ?? {}) as Record<string, string>;
+        }
+
+        return {};
+    })();
+
+    // remove prefixes
+    return Object.fromEntries(Object.entries(rawAttrs).map(([k, v]) => [k.substring(2), v]));
+}
+
+function transformId(scope: Scope, id: string): string {
+    if (scope.entry !== undefined) {
+        id = id.replaceAll("$", scope.entry.value.id);
+    }
+    return id;
 }

@@ -1,32 +1,47 @@
-// import { parse } from "https://deno.land/x/xml@2.1.0/mod.ts"
-// import { parse } from "https://deno.land/x/ts_xml_parser@1.0.0/mod.ts";
-import { XMLParser, XMLBuilder, XMLValidator } from "npm:fast-xml-parser@4";
-import { standardParser } from "./nrsml/utils.ts";
+import { processNRSXML, ProcessOptions } from "./nrsml/parse.ts";
+import { newContext, processContext } from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/48e89a81959bf839d9d25e1673c4a760c05e22af/mod.ts";
+import { writableStreamFromWriter } from "https://deno.land/std@0.181.0/streams/mod.ts";
+import { dirname, resolve } from "https://deno.land/std@0.181.0/path/mod.ts";
 
-const source = await Deno.readTextFile("./xml/impl/BlueArchive.xml");
-const document = standardParser().parse(source);
+const bulk = Deno.openSync("bulk.json", { create: true, write: true });
+bulk.truncateSync(0);
 
-const builder = new XMLBuilder({
-  // attributes are important
-  ignoreAttributes: false,
-  // default prefixes, in case something changes
-  // attributeNamePrefix: "@_",
-  // attributesGroupName: ":@",
-  // keep the comments to preserve the document structure
-  commentPropName: "#comment",
-  textNodeName: "#text",
-  // ordering is important, e.g. there are many best girl elements
-  // (only the last one is used, but i like baiting :tf)
-  preserveOrder: true,
-  suppressEmptyNode: true,
-})
+const stream = writableStreamFromWriter(bulk);
+const context = newContext({
+    extensions: {
+        DAH_combine_pow: {},
+        DAH_entry_progress: {},
+        DAH_factors: {},
+        DAH_overall_score: {},
+        DAH_standards: {},
+        DAH_serialize: {},
+        DAH_serialize_json: {
+            bulk: stream,
+            indent: 4,
+        },
+    },
+});
 
-console.log(JSON.stringify(document));
-await Deno.writeTextFile('xml/impl/BlueArchive2.xml', builder.build(document));
+function getOptions(path: string): ProcessOptions {
+    return {
+        includeResolver: (relativePath) => {
+            const newPath = resolve(dirname(path), relativePath);
+            return [Deno.readTextFileSync(newPath), getOptions(newPath)];
+        },
+        scriptResolver: (relativePath) => {
+            const newPath = resolve(dirname(path), relativePath);
+            return Deno.readTextFileSync(newPath);
+        },
+        ignoreNodes: [],
+        freeze: true,
+    };
+}
 
-// import { processNRSXML } from "./nrsml/parse.ts";
-// const source = await Deno.readTextFile("./xml/impl/Cue.xml");
-// processNRSXML(source);
+const filename = "xml/impl/BlueArchive.xml";
+const options = getOptions(filename);
 
-// const source = await Deno.readTextFile("./xml/impl/BlueArchive.xml");
-// const document = standardParser().parse(source);
+const { nrsData } = processNRSXML(context, Deno.readTextFileSync(filename), options);
+
+processContext(context, nrsData);
+
+Deno.writeTextFileSync("ignore.json", JSON.stringify(options.ignoreNodes, undefined, 4));

@@ -123,14 +123,15 @@ unless you modify the remote file -->
             <!--- comedy was weak ngl -->
             <nei base="0.5" emotions="AP" />
 
-            <animeProgressOld boredom="completed" episodes="24" />
+            <animeConsumedProgress status="Completed" boredom="1.0" episodes="24" />
+            
             <visual type="animated" base="0.5" unique="0.2" />
 
             <featureMusic id="M-VGMDB-AL-115724" />
 
             <!-- duopoly shithole moment -->
-            <killedBy id="F-VGMDB-4499" potential="0.25" effect="0.25" />
-            <killedBy id="F-VGMDB-7059" potential="0.25" effect="0.75" />
+            <killedBy id="F-VGMDB-4499 [null entry]" potential="0.25" effect="0.25" />
+            <killedBy id="F-VGMDB-7059 [null entry]" potential="0.25" effect="0.75" />
         </entry>
 
         <entry

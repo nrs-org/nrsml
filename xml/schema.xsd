@@ -18,7 +18,7 @@
 
     <xs:element name="include">
         <xs:complexType>
-            <xs:attribute name="src" type="xs:anyURI" />
+            <xs:attribute name="src" type="xs:anyURI" use="required" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
@@ -149,7 +149,7 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:choice minOccurs="0" maxOccurs="1">
                         <xs:element name="score">
                             <xs:complexType>
                                 <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -189,7 +189,7 @@
     <xs:element name="waifu" substitutionGroup="impact">
         <xs:complexType>
             <xs:complexContent>
-                <xs:extension base="LengthEmotionImpact">
+                <xs:extension base="LengthImpact">
                     <xs:attribute name="waifu" type="xs:string" />
                 </xs:extension>
             </xs:complexContent>
@@ -220,7 +220,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="consume" substitutionGroup="impact">
+    <xs:element name="consumed" substitutionGroup="impact">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
@@ -234,34 +234,13 @@
     <!-- AnimeConsumed is not ported because it's not actually used in the DSL -->
 
     <xs:element name="dropped" substitutionGroup="impact" type="Impact" />
-    <xs:element name="animeProgressOld" substitutionGroup="impact">
-        <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="Impact">
-                    <xs:attribute name="episodes" type="xs:positiveInteger" />
-                    <xs:attribute name="boredom">
-                        <xs:simpleType>
-                            <xs:restriction base="xs:string">
-                                <xs:enumeration value="completed" />
-                                <xs:enumeration value="watching" />
-                                <xs:enumeration value="tempOnHold" />
-                                <xs:enumeration value="completedWithNoticeableBoredom" />
-                                <xs:enumeration value="dropped" />
-                                <xs:enumeration value="unwatched" />
-                            </xs:restriction>
-                        </xs:simpleType>
-                    </xs:attribute>
-                </xs:extension>
-            </xs:complexContent>
-        </xs:complexType>
-    </xs:element>
 
     <xs:element name="meme" substitutionGroup="impact" type="LengthImpact" />
     <xs:element name="music" substitutionGroup="impact">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="Impact">
-                    <xs:attribute name="base" type="xs:double" />
+                    <xs:attribute name="base" type="xs:double" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -736,14 +715,14 @@
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})"
+                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})( \[null entry\])?"
             />
         </xs:restriction>
     </xs:simpleType>
 
     <xs:simpleType name="SpecialDate">
         <xs:restriction base="xs:string">
-            <xs:pattern value="(today|epoch)([+-]\d+)?" />
+            <xs:pattern value="(today|epoch)(\+\d+)?" />
         </xs:restriction>
     </xs:simpleType>
 
