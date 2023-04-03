@@ -724,7 +724,7 @@
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="$-\d+|(GF|[AMLVFG])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})( \[null entry\])?"
+                value="$-\d+|.* [null entry]|(GF|[AMLVFGO])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})(-\d+)?"
             />
         </xs:restriction>
     </xs:simpleType>
