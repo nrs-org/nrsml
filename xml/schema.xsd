@@ -51,7 +51,7 @@
             </xs:simpleContent>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="commonMeta" abstract="true" />
     <xs:element name="entryMeta" abstract="true" />
     <xs:element name="impactMeta" abstract="true" />
@@ -235,7 +235,16 @@
 
     <xs:element name="dropped" substitutionGroup="impact" type="Impact" />
 
-    <xs:element name="meme" substitutionGroup="impact" type="LengthImpact" />
+    <xs:element name="meme" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="LengthImpact">
+                    <xs:attribute name="strength" type="xs:double" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="music" substitutionGroup="impact">
         <xs:complexType>
             <xs:complexContent>
