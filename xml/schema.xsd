@@ -333,7 +333,7 @@
     <xs:element name="animeProgress" substitutionGroup="entryMeta">
         <xs:complexType>
             <xs:attribute name="status" type="EntryStatus" use="required" />
-            <xs:attribute name="episodes" type="xs:positiveInteger" use="required" />
+            <xs:attribute name="episodes" type="xs:nonNegativeInteger" use="required" />
             <xs:attribute name="episodeDuration" type="Duration" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
@@ -357,7 +357,7 @@
                 <xs:extension base="Impact">
                     <xs:attribute name="status" type="EntryStatus" use="required" />
                     <xs:attribute name="boredom" type="xs:double" use="required" />
-                    <xs:attribute name="episodes" type="xs:positiveInteger" use="required" />
+                    <xs:attribute name="episodes" type="xs:nonNegativeInteger" use="required" />
                     <xs:attribute name="episodeDuration" type="Duration" />
                 </xs:extension>
             </xs:complexContent>
@@ -718,7 +718,7 @@
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="$-\d+|.* [null entry]|(GF|[AMLVFGO])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})(-\d+)?"
+                value="$-\d+|.* \[null entry\]|(GF|[AMLVFGO])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})(-\d+)?"
             />
         </xs:restriction>
     </xs:simpleType>
