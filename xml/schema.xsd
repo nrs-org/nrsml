@@ -566,14 +566,8 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="ContainFactorExpr">
-        <xs:restriction base="xs:string">
-            <xs:pattern value="(vocal|inst|image)(\+(vocal|inst|image))*" />
-        </xs:restriction>
-    </xs:simpleType>
-
     <xs:simpleType name="ContainFactor">
-        <xs:union memberTypes="xs:double ContainFactorExpr" />
+        <xs:union memberTypes="xs:string" />
     </xs:simpleType>
 
     <xs:simpleType name="VisualKind">
