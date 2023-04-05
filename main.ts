@@ -1,5 +1,5 @@
 import { processNRSXML, ProcessOptions } from "./nrsml/parse.ts";
-import { newContext, processContext } from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/48e89a81959bf839d9d25e1673c4a760c05e22af/mod.ts";
+import { newContext, processContext } from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/a93ea18ab3fa4f732fb7822038680235c6485d03/mod.ts";
 import { writableStreamFromWriter } from "https://deno.land/std@0.181.0/streams/mod.ts";
 import { dirname, resolve } from "https://deno.land/std@0.181.0/path/mod.ts";
 
@@ -37,10 +37,10 @@ function getOptions(path: string): ProcessOptions {
     };
 }
 
-const filename = "xml/impl/BlueArchive.xml";
+const filename = "/home/torani/dev/nrs-impl-kt/impl/src/main/kotlin/com/dah/nrs/NRSImplMain.xml";
 const options = getOptions(filename);
 
-const { nrsData } = processNRSXML(context, Deno.readTextFileSync(filename), options);
+const { nrsData, publicMacros } = processNRSXML(context, Deno.readTextFileSync(filename), options);
 
 processContext(context, nrsData);
 

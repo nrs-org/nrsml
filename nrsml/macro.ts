@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { assert } from "./utils.ts";
+import { assert, isElement } from "./utils.ts";
 
 export interface Macro {
     name: string;
@@ -44,10 +44,17 @@ function replace(string: string, replacements: Map<string, string>): string {
     return string;
 }
 
-export function substituteMacro(macro: Macro, variables: Map<string, string>): unknown[] {
+export function substituteMacro(
+    macro: Macro,
+    variables: Map<string, string>,
+    macroChildNodes: unknown[]
+): unknown[] {
     return transform(macro.template, (value, key) => {
         if (typeof value === "string") {
             value = replace(value, variables);
+        }
+        if (isElement(value, "children")) {
+            return macroChildNodes;
         }
         if (typeof key === "string") {
             key = replace(key, variables);

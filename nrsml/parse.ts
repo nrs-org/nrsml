@@ -28,7 +28,7 @@ import {
     Sign,
     VisualType,
     EntryStatus,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/48e89a81959bf839d9d25e1673c4a760c05e22af/mod.ts";
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/a93ea18ab3fa4f732fb7822038680235c6485d03/mod.ts";
 // @deno-types="npm:@types/luxon"
 import { DateTime, Duration } from "npm:luxon@3.2.0";
 
@@ -46,6 +46,8 @@ export interface ProcessOptions {
     // deno-lint-ignore no-explicit-any
     ignoreNodes?: any[];
     freeze?: boolean;
+    macros?: Map<string, Macro>;
+    includeOnlyMacros?: boolean;
 }
 
 interface DocumentScope {
@@ -60,6 +62,7 @@ interface DocumentScope {
     // deno-lint-ignore no-explicit-any
     local: any;
     macros: Map<string, Macro>;
+    publicMacros: Map<string, Macro>;
 }
 
 interface EntryScope {
@@ -115,6 +118,7 @@ interface URLScope {
 export interface Result {
     nrsData: Data;
     xmlModel: unknown;
+    publicMacros: Map<string, Macro>;
 }
 
 export function processNRSXML(
@@ -146,8 +150,12 @@ function processRoot(context: Context, document: unknown, options: ProcessOption
             rootScope: null!,
             ignoreNodes: [],
             freeze: false,
+            macros: new Map(),
+            includeOnlyMacros: false,
             ...options,
         },
+        macros: new Map(options.macros ?? new Map()),
+        publicMacros: new Map(),
         root: options.rootScope,
         global: options.rootScope?.global ?? {},
         local: {},
@@ -174,6 +182,7 @@ function processRoot(context: Context, document: unknown, options: ProcessOption
     return {
         nrsData: scope.value.data,
         xmlModel: document,
+        publicMacros: scope.publicMacros,
     };
 }
 
@@ -182,8 +191,9 @@ function processDocument(scope: DocumentScope, node: unknown): boolean {
         return false;
     }
 
-    const documentNodes = node["document"] as Array<unknown>;
-    for (const node of documentNodes) {
+    const childNodes = node["document"] as Array<unknown>;
+    preprocessMacros(scope, childNodes);
+    for (const node of childNodes) {
         if (!processDirective(scope, node) && !processInclude(scope, node)) {
             scope.config.ignoreNodes.push(node);
         }
@@ -192,13 +202,10 @@ function processDocument(scope: DocumentScope, node: unknown): boolean {
     return true;
 }
 
-function processDirective(
-    scope: DocumentScope | EntryScope | ContainsScope,
-    node: unknown
-): boolean {
-    if (isElement(node, "def")) {
+function expandMacros(scope: Scope, node: unknown): unknown[] {
+    if (isElement(node, "def") || scope.root.config.includeOnlyMacros) {
         // already preprocessed
-        return true;
+        return [];
     }
 
     const pending = [node];
@@ -212,6 +219,15 @@ function processDirective(
             pending.push(...expandedMacro);
         }
     }
+
+    return directives;
+}
+
+function processDirective(
+    scope: DocumentScope | EntryScope | ContainsScope,
+    node: unknown
+): boolean {
+    const directives = expandMacros(scope, node);
     for (const directive of directives) {
         const result = processSimpleDirective(scope, directive);
         if (directives.length == 1) {
@@ -227,10 +243,11 @@ function processSimpleDirective(
     node: unknown
 ): boolean {
     return (
-        processEntry(scope, node) ||
-        processImpact(scope, node) ||
-        processRelation(scope, node) ||
-        processScript(scope, node)
+        !scope.root.config.includeOnlyMacros &&
+        (processEntry(scope, node) ||
+            processImpact(scope, node) ||
+            processRelation(scope, node) ||
+            processScript(scope, node))
     );
 }
 
@@ -268,10 +285,12 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
 
     partialEntryScope.entry = partialEntryScope as EntryScope;
     const entryScope = partialEntryScope as EntryScope;
+
+    assert(!scope.root.value.data.entries.has(entry.id), `duplicate entry id ${entry.id}`);
     scope.root.value.data.entries.set(entry.id, entry);
 
     const childNodes = node["entry"] as Array<unknown>;
-    preprocessMacros(entryScope.macros, childNodes);
+    preprocessMacros(entryScope, childNodes);
     for (const childNode of childNodes) {
         if (
             !processDirective(entryScope, childNode) &&
@@ -360,19 +379,17 @@ function processImpactBase<S extends string>(
         macros: new Map(scope.macros),
     };
 
-    preprocessMacros(impactScope.macros, childNodes);
-    for (const childNode of childNodes) {
+    preprocessMacros(impactScope, childNodes);
+    for (const childNode of childNodes.flatMap((node) => expandMacros(impactScope, node))) {
         if (isElement(childNode, "contributor")) {
             const attrs = getAttributes(childNode);
             const id = transformId(scope, attrs["id"]!);
-            const factor = parseFloat(attrs["factor"]);
+            const factor = evaluateContainFactor(attrs["factor"] ?? "1.0");
 
-            for (const impact of impacts) {
-                impact.contributors.set(
-                    id,
-                    Math.min(1.0, (impact.contributors.get(id) ?? 0.0) + factor)
-                );
-            }
+            impacts[0].contributors.set(
+                id,
+                Math.min(1.0, (impacts[0].contributors.get(id) ?? 0.0) + factor)
+            );
         } else if (
             !processScript(impactScope, childNode) &&
             !processCommonMeta(impactScope, childNode) &&
@@ -384,15 +401,19 @@ function processImpactBase<S extends string>(
     }
 
     for (const impact of impacts) {
-        scope.root.value.data.impacts.push(impact);
-        if (impact.contributors.size == 0) {
-            if (scope.entry !== undefined) {
-                impact.contributors.set(scope.entry.value.id, 1.0);
-            }
-        }
+        acceptImpact(scope, impact);
     }
 
     return true;
+}
+
+function acceptImpact(scope: Scope, impact: Impact) {
+    scope.root.value.data.impacts.push(impact);
+    if (impact.contributors.size == 0) {
+        if (scope.entry !== undefined) {
+            impact.contributors.set(scope.entry.value.id, 1.0);
+        }
+    }
 }
 
 function processRegularImpact(scope: DocumentScope | EntryScope | ContainsScope, node: unknown) {
@@ -537,7 +558,7 @@ function processMaxAEIPADS(
 
 function processCryPADS(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
     return processLengthEmotionImpactBase(scope, node, "cryPADS", (emotions, periods) =>
-        scope.root.context.extensions.DAH_standards!.maxAEIPADS(
+        scope.root.context.extensions.DAH_standards!.cryPADS(
             scope.root.context,
             new Map(),
             periods,
@@ -754,8 +775,8 @@ function processRelationBase<S extends string>(
         macros: new Map(scope.macros),
     };
 
-    preprocessMacros(relationScope.macros, childNodes);
-    for (const childNode of childNodes) {
+    preprocessMacros(relationScope, childNodes);
+    for (const childNode of childNodes.flatMap((node) => expandMacros(relationScope, node))) {
         if (isElement(childNode, "contributor")) {
             const attrs = getAttributes(childNode);
             const id = transformId(scope, attrs["id"]!);
@@ -830,7 +851,7 @@ function processKilledBy(
 function parseVisualType(visualType: string): VisualType | undefined {
     return {
         animated: VisualType.Animated,
-        rpg3DGame: VisualType.RPG3DGame,
+        rpg3dGame: VisualType.RPG3DGame,
         animatedShort: VisualType.AnimatedShort,
         animatedMV: VisualType.AnimatedMV,
         visualNovel: VisualType.VisualNovel,
@@ -875,7 +896,7 @@ function parsePeriod(scope: Scope, node: unknown): DatePeriod | undefined {
 function parseDate(scope: Scope, dateString: string): DateTime {
     if (dateString === "today") {
         return scope.root.config.today;
-    } else if(dateString.startsWith("epoch")) {
+    } else if (dateString.startsWith("epoch")) {
         const offset = parseInt(dateString.substring(6));
         return DateTime.fromSeconds(offset * 86400);
     } else {
@@ -934,17 +955,22 @@ function processRelation(
     );
 }
 
+function evaluateContainFactor(expression: string): number {
+    const f = new Function("vocal", "inst", "image", "main", "feat", "return " + expression);
+    return f.apply(undefined, [0.4, 0.4, 0.2, 0.6, 0.4]) as number;
+}
+
 function processContains(scope: EntryScope | ContainsScope, node: unknown): boolean {
     if (!isElement(node, "contains")) {
         return false;
     }
 
     const attrs = getAttributes(node);
-    const factor = parseFloat(attrs["factor"] ?? "1.0");
+    const factor = evaluateContainFactor(attrs["factor"] ?? "1.0");
     let id = attrs["id"];
     if (id !== undefined) {
         id = transformId(scope, id);
-        scope.entry.value.children.set(id, factor);
+        scope.entry.value.children.set(id, scope.multipliedFactor * factor);
     }
 
     const containsScope: ContainsScope = {
@@ -961,7 +987,7 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
     let warned = false;
 
     const childNodes = node["contains"] as Array<unknown>;
-    preprocessMacros(containsScope.macros, childNodes);
+    preprocessMacros(containsScope, childNodes);
     for (const childNode of childNodes) {
         if (
             processDirective(containsScope, childNode) ||
@@ -985,10 +1011,7 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
 }
 
 // expand the macro, if this is not a `ref` element, return undefined
-function processReference(
-    scope: DocumentScope | EntryScope | ContainsScope,
-    node: unknown
-): unknown[] | undefined {
+function processReference(scope: Scope, node: unknown): unknown[] | undefined {
     if (!(isObject(node) && "ref" in node)) {
         return undefined;
     }
@@ -1002,7 +1025,7 @@ function processReference(
     }
 
     delete attrs["name"];
-    return substituteMacro(macro, new Map(Object.entries(attrs)));
+    return substituteMacro(macro, new Map(Object.entries(attrs)), node["ref"] as unknown[]);
 }
 
 // scripts too
@@ -1153,12 +1176,15 @@ function processConsumedProgress(scope: EntryScope, node: unknown): boolean {
     }
 
     const attrs = getAttributes(node);
-    scope.root.context.extensions.DAH_entry_progress!.consumedProgress(
-        scope.root.context,
-        scope.value,
-        parseStatus(attrs["status"]!)!,
-        parseFloat(attrs["boredom"]!)!,
-        parseDuration(attrs["duration"]!)!
+    acceptImpact(
+        scope,
+        scope.root.context.extensions.DAH_entry_progress!.consumedProgress(
+            scope.root.context,
+            scope.value,
+            parseStatus(attrs["status"]!)!,
+            parseFloat(attrs["boredom"]!)!,
+            parseDuration(attrs["duration"]!)!
+        )
     );
     return true;
 }
@@ -1169,12 +1195,16 @@ function processAnimeConsumedProgress(scope: EntryScope, node: unknown): boolean
     }
 
     const attrs = getAttributes(node);
-    scope.root.context.extensions.DAH_entry_progress!.animeConsumedProgress(
-        scope.root.context,
-        scope.value,
-        parseStatus(attrs["status"]!)!,
-        parseInt(attrs["episodes"]),
-        parseDuration(attrs["episodeDuration"] ?? "20:00")
+    acceptImpact(
+        scope,
+        scope.root.context.extensions.DAH_entry_progress!.animeConsumedProgress(
+            scope.root.context,
+            scope.value,
+            parseStatus(attrs["status"]!)!,
+            parseFloat(attrs["boredom"]),
+            parseInt(attrs["episodes"]),
+            parseDuration(attrs["episodeDuration"] ?? "20:00")
+        )
     );
     return true;
 }
@@ -1185,10 +1215,13 @@ function processMusicConsumedProgress(scope: EntryScope, node: unknown): boolean
     }
 
     const attrs = getAttributes(node);
-    scope.root.context.extensions.DAH_entry_progress!.musicConsumedProgress(
-        scope.root.context,
-        scope.value,
-        parseDuration(attrs["length"]!)!
+    acceptImpact(
+        scope,
+        scope.root.context.extensions.DAH_entry_progress!.musicConsumedProgress(
+            scope.root.context,
+            scope.value,
+            parseDuration(attrs["length"]!)!
+        )
     );
     return true;
 }
@@ -1223,8 +1256,11 @@ function processCommonMeta(
     // scope.value.DAH_meta
 }
 
-function preprocessMacros(macros: Map<string, Macro>, childNodes: unknown[]) {
+function preprocessMacros(scope: Scope, childNodes: unknown[]) {
     for (const node of childNodes) {
+        if (processInclude(scope as DocumentScope, node, true)) {
+            continue;
+        }
         if (!isElement(node, "def")) {
             continue;
         }
@@ -1234,11 +1270,15 @@ function preprocessMacros(macros: Map<string, Macro>, childNodes: unknown[]) {
             .split(",")
             .map((x) => x.trim())
             .map((x) => x.split(":")[0]);
-        macros.set(name, {
+        const macro = {
             name,
             variables,
             template: node["def"] as unknown[],
-        });
+        };
+        scope.macros.set(name, macro);
+        if (attrs["visibility"] === "public" && "publicMacros" in scope) {
+            scope.publicMacros.set(name, macro);
+        }
     }
 }
 
@@ -1284,7 +1324,7 @@ function processValidatorSuppress(
     return true;
 }
 
-function processInclude(scope: DocumentScope, node: unknown): boolean {
+function processInclude(scope: DocumentScope, node: unknown, includeOnlyMacros = false): boolean {
     if (!(isObject(node) && "include" in node)) {
         return false;
     }
@@ -1299,11 +1339,29 @@ function processInclude(scope: DocumentScope, node: unknown): boolean {
         }
 
         const [includedContent, includedOptions] = included;
-        const { nrsData } = processNRSXML(scope.context, includedContent, includedOptions);
+        includedOptions.macros ??= new Map();
+        includedOptions.includeOnlyMacros = includeOnlyMacros;
+        for (const [name, macro] of scope.publicMacros) {
+            if (!includedOptions.macros.has(name)) {
+                includedOptions.macros.set(name, macro);
+            }
+        }
+        const { nrsData, publicMacros } = processNRSXML(
+            scope.context,
+            includedContent,
+            includedOptions
+        );
         const data = scope.value.data;
-        nrsData.entries.forEach((value, key) => data.entries.set(key, value));
-        nrsData.impacts.forEach((x) => data.impacts.push(x));
-        nrsData.relations.forEach((x) => data.relations.push(x));
+        if (!includeOnlyMacros) {
+            nrsData.entries.forEach((value, key) => data.entries.set(key, value));
+            nrsData.impacts.forEach((x) => data.impacts.push(x));
+            nrsData.relations.forEach((x) => data.relations.push(x));
+        }
+
+        for (const [name, macro] of publicMacros) {
+            scope.macros.set(name, macro);
+            scope.publicMacros.set(name, macro);
+        }
     }
 
     return true;

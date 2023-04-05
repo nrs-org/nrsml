@@ -377,7 +377,7 @@
     <xs:element name="contributor">
         <xs:complexType>
             <xs:attribute name="id" type="EntryId" use="required" />
-            <xs:attribute name="factor" type="xs:double" use="required" />
+            <xs:attribute name="factor" type="ContainFactor" use="required" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
@@ -427,6 +427,7 @@
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="contributor" />
             <xs:element ref="script" />
+            <xs:element ref="ref" />
             <xs:element ref="commonMeta" />
             <xs:element ref="impactMeta" />
         </xs:choice>
@@ -494,6 +495,7 @@
             <xs:element ref="contributor" />
             <xs:element ref="reference" />
             <xs:element ref="script" />
+            <xs:element ref="ref" />
             <xs:element ref="commonMeta" />
             <xs:element ref="relationMeta" />
         </xs:choice>
