@@ -1,4 +1,7 @@
 import { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
+import { ProcessOptions } from "./parse.ts";
+import { dirname, resolve } from "https://deno.land/std@0.182.0/path/mod.ts";
+import { existsSync } from "https://deno.land/std@0.182.0/fs/mod.ts";
 
 let parser: XMLParser | null = null;
 let builder: XMLBuilder | null = null;
@@ -95,4 +98,53 @@ export function deepFreeze(object: unknown) {
     }
 
     return Object.freeze(object);
+}
+
+export class FileResolver {
+    includeDirectories: string[] = [];
+    optionsTransformer?(options: ProcessOptions): void;
+
+    addIncludeDirectory(path: string) {
+        this.includeDirectories.push(path);
+    }
+
+    getParseOptions(documentPath?: string): ProcessOptions {
+        const options = {
+            freeze: true,
+            includeResolver: this.includeResolver(documentPath),
+        };
+
+        if (this.optionsTransformer !== undefined) {
+            this.optionsTransformer(options);
+        }
+
+        return options;
+    }
+
+    findPath(searchDirectories: string[], referencePath: string): string | undefined {
+        for (let i = 0; i < searchDirectories.length; i++) {
+            const path = resolve(searchDirectories[i], referencePath);
+            if (existsSync(path)) {
+                return path;
+            }
+        }
+
+        return undefined;
+    }
+
+    includeResolver(documentPath?: string): (p: string) => [string, ProcessOptions] | undefined {
+        return (referencePath) => {
+            let searchDirectories = this.includeDirectories;
+            if (documentPath !== undefined) {
+                searchDirectories = [dirname(documentPath), ...searchDirectories];
+            }
+
+            const path = this.findPath(searchDirectories, referencePath);
+            if(path === undefined) {
+                return undefined;
+            }
+
+            return [Deno.readTextFileSync(path), this.getParseOptions(path)];
+        };
+    }
 }
