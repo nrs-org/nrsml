@@ -4,7 +4,7 @@ import { processNRSXML } from "../mod.ts";
 import {
     newContext,
     processContext,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.0/mod.ts";
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.1/mod.ts";
 import { writableStreamFromWriter } from "https://deno.land/std@0.181.0/streams/mod.ts";
 
 if (Deno.args.length == 0) {
