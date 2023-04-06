@@ -28,7 +28,7 @@ import {
     Sign,
     VisualType,
     EntryStatus,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/a93ea18ab3fa4f732fb7822038680235c6485d03/mod.ts";
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.0/mod.ts";
 // @deno-types="npm:@types/luxon"
 import { DateTime, Duration } from "npm:luxon@3.2.0";
 
