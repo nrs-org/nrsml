@@ -28,9 +28,9 @@ import {
     Sign,
     VisualType,
     EntryStatus,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.1/mod.ts";
-// @deno-types="npm:@types/luxon"
-import { DateTime, Duration } from "npm:luxon@3.2.0";
+    DateTime,
+    Duration
+} from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
 

@@ -1,0 +1,42 @@
+name: Test & Auto-Release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    name: ${{ matrix.kind }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    env:
+      GH_ACTIONS: true
+      DENO_BUILD_MODE: release
+      V8_BINARY: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denolib/setup-deno@master
+        with:
+          deno-version: 1.x
+      - name: Tests
+        run: deno test --allow-read
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+            node-version: 18
+      - name: Install dependencies
+        run: npm install -g semantic-release semantic-release-gitmoji
+      - name: Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

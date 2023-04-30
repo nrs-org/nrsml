@@ -1,4 +1,4 @@
-import { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
+import { XMLBuilder, XMLParser } from "../deps.ts";
 import { ProcessOptions } from "./parse.ts";
 import { dirname, resolve } from "https://deno.land/std@0.182.0/path/mod.ts";
 import { existsSync } from "https://deno.land/std@0.182.0/fs/mod.ts";
@@ -140,7 +140,7 @@ export class FileResolver {
             }
 
             const path = this.findPath(searchDirectories, referencePath);
-            if(path === undefined) {
+            if (path === undefined) {
                 return undefined;
             }
 
