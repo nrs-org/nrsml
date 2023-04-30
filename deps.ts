@@ -27,7 +27,7 @@ export {
     Sign,
     VisualType,
     EntryStatus,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.1/mod.ts";
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.2/mod.ts";
 
 export { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
 
