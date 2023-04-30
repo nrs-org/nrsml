@@ -1,33 +1,5 @@
 {
     "plugins": [
-        [
-            "semantic-release-gitmoji",
-            {
-                "releaseRules": {
-                    "patch": {
-                        "include": [
-                            ":bento:",
-                            ":recycle:",
-                            ":bug:",
-                            ":ambulance:",
-                            ":lock:",
-                            ":arrow_up:",
-                            ":arrow_down:"
-                        ]
-                    },
-                    "minor": {
-                        "include": [
-                            ":sparkles:"
-                        ]
-                    },
-                    "major": {
-                        "include": [
-                            ":boom:"
-                        ]
-                    }
-                }
-            }
-        ],
         "@semantic-release/github"
     ]
 }
