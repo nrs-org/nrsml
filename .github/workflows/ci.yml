@@ -21,8 +21,8 @@ jobs:
         uses: denolib/setup-deno@master
         with:
           deno-version: 1.x
-      - name: Tests
-        run: deno test --allow-read
+      - name: Generate `DAH_anime_normalize.json
+        run: deno run --allow-all scripts/generate_DAH_anime_normalize.ts DAH_anime_normalize.json && rm DAH_anime_normalize.json
   release:
     name: Release
     runs-on: ubuntu-latest
