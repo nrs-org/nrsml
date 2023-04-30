@@ -9,7 +9,9 @@
                         ":recycle:",
                         ":bug:",
                         ":ambulance:",
-                        ":lock:"
+                        ":lock:",
+                        ":arrow_up:",
+                        ":arrow_down:"
                     ],
                     "minor": [
                         ":sparkles:"
