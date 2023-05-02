@@ -29,7 +29,8 @@ import {
     VisualType,
     EntryStatus,
     DateTime,
-    Duration
+    Duration,
+    ifDefined,
 } from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
@@ -1320,7 +1321,15 @@ function processValidatorSuppress(
     }
 
     const rules = getAttributes(node)["rules"]!.split(";");
-    setMeta(scope, "DAH_validator_suppress", rules);
+    ifDefined(scope.root.context.extensions.DAH_validator_suppress, e => {
+        const value = Array.isArray(scope.value)? scope.value : [scope.value];
+
+        for(const elem of value) {
+            for(const rule of rules) {
+                e.suppressRule(elem, rule);
+            }
+        }
+    });
     return true;
 }
 
