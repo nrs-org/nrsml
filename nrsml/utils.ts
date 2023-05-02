@@ -102,17 +102,28 @@ export function deepFreeze(object: unknown) {
 
 export class FileResolver {
     includeDirectories: string[] = [];
-    warnScriptNotFound: (searchDirectories: string[], scriptPath: string) => void = () => {};
+    scriptDirectories: string[] = [];
+    warnNotFound: (searchDirectories: string[], scriptPath: string) => void = () => {};
     optionsTransformer?(options: ProcessOptions): void;
+
+    addResolveDirectory(path: string) {
+        this.addIncludeDirectory(path);
+        this.addScriptDirectory(path);
+    }
 
     addIncludeDirectory(path: string) {
         this.includeDirectories.push(path);
     }
 
-    getParseOptions(documentPath?: string): ProcessOptions {
+    addScriptDirectory(path: string) {
+        this.scriptDirectories.push(path);
+    }
+
+    getProcessOptions(documentPath?: string): ProcessOptions {
         const options = {
             freeze: true,
             includeResolver: this.includeResolver(documentPath),
+            scriptResolver: this.scriptResolver(documentPath),
         };
 
         if (this.optionsTransformer !== undefined) {
@@ -122,7 +133,15 @@ export class FileResolver {
         return options;
     }
 
-    findPath(searchDirectories: string[], referencePath: string): string | undefined {
+    findPath(
+        searchDirectories: string[],
+        documentPath: string | undefined,
+        referencePath: string
+    ): string | undefined {
+        if (documentPath !== undefined) {
+            searchDirectories = [dirname(documentPath), ...searchDirectories];
+        }
+
         for (let i = 0; i < searchDirectories.length; i++) {
             const path = resolve(searchDirectories[i], referencePath);
             if (existsSync(path)) {
@@ -133,20 +152,25 @@ export class FileResolver {
         return undefined;
     }
 
-    includeResolver(documentPath?: string): (p: string) => [string, ProcessOptions] | undefined {
+    scriptResolver(documentPath?: string): (p: string) => string | undefined {
         return (referencePath) => {
-            let searchDirectories = this.includeDirectories;
-            if (documentPath !== undefined) {
-                searchDirectories = [dirname(documentPath), ...searchDirectories];
-            }
-
-            const path = this.findPath(searchDirectories, referencePath);
+            const path = this.findPath(this.scriptDirectories, documentPath, referencePath);
             if (path === undefined) {
-                this.warnScriptNotFound(searchDirectories, referencePath);
                 return undefined;
             }
 
-            return [Deno.readTextFileSync(path), this.getParseOptions(path)];
+            return Deno.readTextFileSync(path);
+        };
+    }
+
+    includeResolver(documentPath?: string): (p: string) => [string, ProcessOptions] | undefined {
+        return (referencePath) => {
+            const path = this.findPath(this.includeDirectories, documentPath, referencePath);
+            if (path === undefined) {
+                return undefined;
+            }
+
+            return [Deno.readTextFileSync(path), this.getProcessOptions(path)];
         };
     }
 }
