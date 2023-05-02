@@ -102,6 +102,7 @@ export function deepFreeze(object: unknown) {
 
 export class FileResolver {
     includeDirectories: string[] = [];
+    warnScriptNotFound: (searchDirectories: string[], scriptPath: string) => void = () => {};
     optionsTransformer?(options: ProcessOptions): void;
 
     addIncludeDirectory(path: string) {
@@ -141,6 +142,7 @@ export class FileResolver {
 
             const path = this.findPath(searchDirectories, referencePath);
             if (path === undefined) {
+                this.warnScriptNotFound(searchDirectories, referencePath);
                 return undefined;
             }
 
