@@ -28,7 +28,7 @@ export {
     VisualType,
     EntryStatus,
     ifDefined,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.2/mod.ts";
+} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.3/mod.ts";
 
 export { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
 
