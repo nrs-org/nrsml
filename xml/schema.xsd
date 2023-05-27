@@ -709,14 +709,6 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="Program">
-        <xs:restriction base="xs:string">
-            <xs:pattern
-                value="|[a-zA-Z0-9 \.,_]+ v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?"
-            />
-        </xs:restriction>
-    </xs:simpleType>
-
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
@@ -741,13 +733,12 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:attribute name="generatedBy" type="Program" default="">
+    <xs:attribute name="generatedBy" type="xs:string" default="">
         <xs:annotation>
-            <xs:documentation> This should only be produced when the owner element of the attribute
-                is generated via a program. The value should be in the form of "$(PROGRAM NAME)
-                $(VERSION)". $(PROGRAM NAME) must be an alphanumeric string (with additional symbols
-                like underscores, whitespaces, commas, dots, and $(VERSION) must be a valid semantic
-                version string, see: https://semver.org/) </xs:documentation>
+            <xs:documentation>
+                This is used to mark segments of NRSML code that was generated
+                by some third-party program.
+            </xs:documentation>
         </xs:annotation>
     </xs:attribute>
 </xs:schema>
