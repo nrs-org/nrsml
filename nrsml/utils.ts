@@ -43,6 +43,14 @@ export function standardParser(): XMLParser {
             // since there may be some weird-ass names with leading or trailing spaces,
             // and more importantly, it preserves the document structure
             trimValues: false,
+            
+            tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
+                return tagValue.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>');
+            },
+            
+            attributeValueProcessor: (name, val, jPath) => {
+                return val.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>');
+            },
         }));
 }
 
