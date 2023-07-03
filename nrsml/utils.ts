@@ -44,14 +44,13 @@ export function standardParser(): XMLParser {
             // and more importantly, it preserves the document structure
             trimValues: false,
             
-            tagValueProcessor: (tagName, tagValue, jPath, hasAttributes, isLeafNode) => {
-                return tagValue.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>');
-            },
-            
-            attributeValueProcessor: (name, val, jPath) => {
-                return val.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>');
-            },
+            tagValueProcessor: (_, tagValue) => processValue(tagValue),
+            attributeValueProcessor: (_, value) => processValue(value),
         }));
+}
+
+function processValue(value: string): string {
+    return value.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
 }
 
 export function standardBuilder(): XMLBuilder {
