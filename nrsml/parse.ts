@@ -43,6 +43,7 @@ export interface ProcessOptions {
     today?: DateTime;
     includeResolver?(path: string): [string, ProcessOptions] | undefined;
     scriptResolver?(path: string): string | undefined;
+    containFactorEvaluator?(script: string): number;
     rootScope?: DocumentScope;
     // deno-lint-ignore no-explicit-any
     ignoreNodes?: any[];
@@ -148,6 +149,17 @@ function processRoot(context: Context, document: unknown, options: ProcessOption
             today: DateTime.now(),
             includeResolver: () => undefined,
             scriptResolver: () => undefined,
+            containFactorEvaluator: (expression) => {
+                const f = new Function(
+                    "vocal",
+                    "inst",
+                    "image",
+                    "main",
+                    "feat",
+                    "return " + expression
+                );
+                return f.apply(undefined, [0.4, 0.4, 0.2, 0.6, 0.4]) as number;
+            },
             rootScope: null!,
             ignoreNodes: [],
             freeze: false,
@@ -385,7 +397,7 @@ function processImpactBase<S extends string>(
         if (isElement(childNode, "contributor")) {
             const attrs = getAttributes(childNode);
             const id = transformId(scope, attrs["id"]!);
-            const factor = evaluateContainFactor(attrs["factor"] ?? "1.0");
+            const factor = scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0");
 
             impacts[0].contributors.set(
                 id,
@@ -956,18 +968,13 @@ function processRelation(
     );
 }
 
-function evaluateContainFactor(expression: string): number {
-    const f = new Function("vocal", "inst", "image", "main", "feat", "return " + expression);
-    return f.apply(undefined, [0.4, 0.4, 0.2, 0.6, 0.4]) as number;
-}
-
 function processContains(scope: EntryScope | ContainsScope, node: unknown): boolean {
     if (!isElement(node, "contains")) {
         return false;
     }
 
     const attrs = getAttributes(node);
-    const factor = evaluateContainFactor(attrs["factor"] ?? "1.0");
+    const factor = scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0");
     let id = attrs["id"];
     if (id !== undefined) {
         id = transformId(scope, id);
@@ -1321,11 +1328,11 @@ function processValidatorSuppress(
     }
 
     const rules = getAttributes(node)["rules"]!.split(";");
-    ifDefined(scope.root.context.extensions.DAH_validator_suppress, e => {
-        const value = Array.isArray(scope.value)? scope.value : [scope.value];
+    ifDefined(scope.root.context.extensions.DAH_validator_suppress, (e) => {
+        const value = Array.isArray(scope.value) ? scope.value : [scope.value];
 
-        for(const elem of value) {
-            for(const rule of rules) {
+        for (const elem of value) {
+            for (const rule of rules) {
                 e.suppressRule(elem, rule);
             }
         }
