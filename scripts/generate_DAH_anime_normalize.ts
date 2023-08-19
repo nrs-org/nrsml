@@ -1,15 +1,12 @@
 // this script is used to generate this file:
 // https://github.com/ngoduyanh/nrs-lib-ts/blob/master/src/exts/DAH_anime_normalize_bulk.json
 import { processNRSXML } from "../mod.ts";
-import {
-    newContext,
-    processContext,
-} from "../deps.ts";
+import { newContext, processContext } from "../deps.ts";
 import { writableStreamFromWriter } from "https://deno.land/std@0.181.0/streams/mod.ts";
 
 if (Deno.args.length == 0) {
     console.error(
-        "Usage: [deno run --allow-all] scripts/generate_DAH_anime_normalize.json [output path]"
+        "Usage: [deno run --allow-all] scripts/generate_DAH_anime_normalize.ts [output path]"
     );
     Deno.exit(1);
 }
