@@ -31,6 +31,8 @@ import {
     DateTime,
     Duration,
     ifDefined,
+    AdditionalSources,
+    Meta,
 } from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
@@ -45,8 +47,7 @@ export interface ProcessOptions {
     scriptResolver?(path: string): string | undefined;
     containFactorEvaluator?(script: string): number;
     rootScope?: DocumentScope;
-    // deno-lint-ignore no-explicit-any
-    ignoreNodes?: any[];
+    ignoreNodes?: unknown[];
     freeze?: boolean;
     macros?: Map<string, Macro>;
     includeOnlyMacros?: boolean;
@@ -59,10 +60,8 @@ interface DocumentScope {
     root: DocumentScope;
     entry: undefined;
     config: Required<Omit<ProcessOptions, "rootScope" | "freeze">> & ProcessOptions;
-    // deno-lint-ignore no-explicit-any
-    global: any;
-    // deno-lint-ignore no-explicit-any
-    local: any;
+    global: unknown;
+    local: unknown;
     macros: Map<string, Macro>;
     publicMacros: Map<string, Macro>;
 }
@@ -73,8 +72,7 @@ interface EntryScope {
     entry: EntryScope;
     parent: DocumentScope | ContainsScope | EntryScope;
     value: Entry;
-    // deno-lint-ignore no-explicit-any
-    local: any;
+    local: unknown;
     multipliedFactor: 1.0;
     macros: Map<string, Macro>;
 }
@@ -85,8 +83,7 @@ interface ImpactScope {
     entry: EntryScope | undefined;
     parent: DocumentScope | ContainsScope | EntryScope;
     value: Impact[];
-    // deno-lint-ignore no-explicit-any
-    local: any;
+    local: unknown;
     macros: Map<string, Macro>;
 }
 
@@ -96,8 +93,7 @@ interface RelationScope {
     entry: EntryScope | undefined;
     parent: DocumentScope | ContainsScope | EntryScope;
     value: Relation[];
-    // deno-lint-ignore no-explicit-any
-    local: any;
+    local: unknown;
     macros: Map<string, Macro>;
 }
 
@@ -108,13 +104,12 @@ interface ContainsScope {
     parent: EntryScope | ContainsScope;
     factor: number;
     multipliedFactor: number;
-    // deno-lint-ignore no-explicit-any
-    local: any;
+    local: unknown;
     macros: Map<string, Macro>;
 }
 
 interface URLScope {
-    value: HasMeta;
+    value: HasMeta<Meta>;
 }
 
 export interface Result {
@@ -1087,7 +1082,7 @@ function processSource(scope: EntryScope, node: unknown): boolean {
         return false;
     }
     const childNodes = node["source"] as Array<unknown>;
-    const DAH_additional_sources: Record<string, unknown> = {};
+    const DAH_additional_sources: AdditionalSources = {};
     scope.value.DAH_meta["DAH_additional_sources"] = DAH_additional_sources;
 
     outer: for (const childNode of childNodes) {
@@ -1096,7 +1091,10 @@ function processSource(scope: EntryScope, node: unknown): boolean {
             continue;
         }
 
-        const simpleDatabases = {
+        const simpleDatabases: Record<
+            string,
+            "id_MyAnimeList" | "id_AniList" | "id_AniDB" | "id_Kitsu" | "id_VNDB"
+        > = {
             mal: "id_MyAnimeList",
             al: "id_AniList",
             adb: "id_AniDB",
@@ -1111,16 +1109,16 @@ function processSource(scope: EntryScope, node: unknown): boolean {
         }
 
         if ("vgmdb" in childNode) {
-            DAH_additional_sources["vgmdb"] = getAttributes(childNode);
+            DAH_additional_sources.vgmdb = getAttributes(childNode);
         } else if ("urls" in childNode) {
-            const urlObjects = (DAH_additional_sources["urls"] ??= []) as Array<unknown>;
+            const urlObjects = (DAH_additional_sources.urls ??= []);
 
             for (const urlNode of childNode["urls"] as Array<unknown>) {
                 if (!isElement(urlNode, "url")) {
                     scope.root.config.ignoreNodes.push(urlNode);
                     continue;
                 }
-                const attrs = getAttributes(urlNode);
+                const attrs = getAttributes(urlNode) as Record<"name" | "src", string>;
                 const urlScope: URLScope = {
                     value: {
                         DAH_meta: {},
@@ -1240,7 +1238,7 @@ function processBestGirl(scope: EntryScope, node: unknown): boolean {
     }
 
     const bestGirl = getAttributes(node)["name"]!;
-    scope.value.DAH_meta["DAH_entry_bestGirl"] = bestGirl;
+    scope.value.DAH_meta.DAH_entry_bestGirl = bestGirl;
     return true;
 }
 
@@ -1292,16 +1290,18 @@ function preprocessMacros(scope: Scope, childNodes: unknown[]) {
 
 // only supporting one-layer meta for now
 
-function setMeta(
+function unsafeSetMeta(
     scope: EntryScope | ImpactScope | RelationScope | URLScope,
     key: string,
     value: unknown
 ) {
-    if (Array.isArray(scope.value)) {
-        scope.value.forEach((ir) => (ir.DAH_meta[key] = value));
-    } else {
-        scope.value.DAH_meta[key] = value;
-    }
+    (Array.isArray(scope.value) ? scope.value : [scope.value]).forEach((ir) =>
+        unsafeSetMetaSingle(ir, key, value)
+    );
+}
+
+function unsafeSetMetaSingle<M extends Meta>(hasMeta: HasMeta<M>, key: string, value: unknown) {
+    (hasMeta.DAH_meta as Record<string, unknown>)[key] = value;
 }
 
 function processMeta(
@@ -1315,7 +1315,7 @@ function processMeta(
     const attrs = getAttributes(node);
     const key = attrs["key"]!;
     const value = attrs["value"]!;
-    setMeta(scope, key, value);
+    unsafeSetMeta(scope, key, value);
     return true;
 }
 
@@ -1333,7 +1333,7 @@ function processValidatorSuppress(
 
         for (const elem of value) {
             for (const rule of rules) {
-                e.suppressRule(elem, rule);
+                e.suppressRule<Meta>(elem, rule);
             }
         }
     });

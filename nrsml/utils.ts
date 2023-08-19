@@ -43,14 +43,19 @@ export function standardParser(): XMLParser {
             // since there may be some weird-ass names with leading or trailing spaces,
             // and more importantly, it preserves the document structure
             trimValues: false,
-            
+
             tagValueProcessor: (_, tagValue) => processValue(tagValue),
             attributeValueProcessor: (_, value) => processValue(value),
         }));
 }
 
 function processValue(value: string): string {
-    return value.replace(/&lt;/g, '<').replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+    return value
+        .replace(/&lt;/g, "<")
+        .replace(/&amp;/g, "&")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'");
 }
 
 export function standardBuilder(): XMLBuilder {

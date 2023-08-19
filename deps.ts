@@ -6,6 +6,7 @@ export {
     type HasMeta,
     type Vector,
     type Context,
+    type Meta,
     newZeroVector,
     newContext,
     processContext,
@@ -24,11 +25,12 @@ export {
     type WeightedEmotions,
     type EmotionFactor,
     type DatePeriod,
+    type AdditionalSources,
     Sign,
     VisualType,
     EntryStatus,
     ifDefined,
-} from "https://raw.githubusercontent.com/ngoduyanh/nrs-lib-ts/v0.1.3/mod.ts";
+} from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v1.1.1/mod.ts";
 
 export { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
 
