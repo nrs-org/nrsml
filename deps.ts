@@ -26,6 +26,7 @@ export {
     type EmotionFactor,
     type DatePeriod,
     type AdditionalSources,
+    type EntryMeta,
     Sign,
     VisualType,
     EntryStatus,

@@ -33,6 +33,7 @@ import {
     ifDefined,
     AdditionalSources,
     Meta,
+    EntryMeta,
 } from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
@@ -51,15 +52,17 @@ export interface ProcessOptions {
     freeze?: boolean;
     macros?: Map<string, Macro>;
     includeOnlyMacros?: boolean;
+    DAH_obj_location?: unknown,
 }
 
 interface DocumentScope {
     type: "document";
     context: Context;
     value: Document;
+    document: DocumentScope;
     root: DocumentScope;
     entry: undefined;
-    config: Required<Omit<ProcessOptions, "rootScope" | "freeze">> & ProcessOptions;
+    config: Required<Omit<ProcessOptions, "rootScope" | "freeze" | "DAH_obj_location">> & ProcessOptions;
     global: unknown;
     local: unknown;
     macros: Map<string, Macro>;
@@ -68,6 +71,7 @@ interface DocumentScope {
 
 interface EntryScope {
     type: "entry";
+    document: DocumentScope;
     root: DocumentScope;
     entry: EntryScope;
     parent: DocumentScope | ContainsScope | EntryScope;
@@ -79,6 +83,7 @@ interface EntryScope {
 
 interface ImpactScope {
     type: "impact";
+    document: DocumentScope;
     root: DocumentScope;
     entry: EntryScope | undefined;
     parent: DocumentScope | ContainsScope | EntryScope;
@@ -89,6 +94,7 @@ interface ImpactScope {
 
 interface RelationScope {
     type: "relation";
+    document: DocumentScope;
     root: DocumentScope;
     entry: EntryScope | undefined;
     parent: DocumentScope | ContainsScope | EntryScope;
@@ -99,6 +105,7 @@ interface RelationScope {
 
 interface ContainsScope {
     type: "contains";
+    document: DocumentScope;
     root: DocumentScope;
     entry: EntryScope;
     parent: EntryScope | ContainsScope;
@@ -176,7 +183,9 @@ function processRoot(context: Context, document: unknown, options: ProcessOption
     if (partialScope.root === undefined) {
         partialScope.root = partialScope as DocumentScope;
     }
+
     const scope = partialScope as DocumentScope;
+    partialScope.document = scope;
     assert(document instanceof Array);
     const documentNodes = document as Array<unknown>;
     for (const node of documentNodes) {
@@ -270,7 +279,8 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
         children: new Map(),
         DAH_meta: {
             DAH_entry_title: attrs["title"]!,
-        },
+            DAH_obj_location: Object.assign({}, scope.document.config.DAH_obj_location),
+        } as EntryMeta
     };
 
     if ("multipliedFactor" in scope) {
@@ -283,6 +293,7 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
 
     const partialEntryScope: Partial<EntryScope> = {
         parent: scope,
+        document: scope.document,
         root: scope.root,
         type: "entry",
         value: entry,
@@ -380,6 +391,7 @@ function processImpactBase<S extends string>(
     const impactScope: ImpactScope = {
         type: "impact",
         parent: scope,
+        document: scope.document,
         entry: scope.entry,
         root: scope.root,
         value: impacts,
@@ -416,6 +428,9 @@ function processImpactBase<S extends string>(
 }
 
 function acceptImpact(scope: Scope, impact: Impact) {
+    if(!("DAH_obj_location" in impact.DAH_meta)) {
+        (impact.DAH_meta as Record<string, unknown>).DAH_obj_location = Object.assign({}, scope.document.config.DAH_obj_location);
+    }
     scope.root.value.data.impacts.push(impact);
     if (impact.contributors.size == 0) {
         if (scope.entry !== undefined) {
@@ -776,6 +791,7 @@ function processRelationBase<S extends string>(
     const relationScope: RelationScope = {
         type: "relation",
         parent: scope,
+        document: scope.document,
         entry: scope.entry,
         root: scope.root,
         value: relations,
@@ -808,6 +824,9 @@ function processRelationBase<S extends string>(
 
     for (const relation of relations) {
         scope.root.value.data.relations.push(relation);
+        if(!("DAH_obj_location" in relation.DAH_meta)) {
+            (relation.DAH_meta as Record<string, unknown>).DAH_obj_location = Object.assign({}, scope.document.config.DAH_obj_location);
+        }
         if (relation.contributors.size == 0) {
             if (scope.entry !== undefined) {
                 relation.contributors.set(scope.entry.value.id, 1.0);
@@ -979,6 +998,7 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
     const containsScope: ContainsScope = {
         type: "contains",
         parent: scope,
+        document: scope.document,
         entry: scope.entry,
         root: scope.root,
         factor,
