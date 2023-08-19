@@ -287,7 +287,7 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
         type: "entry",
         value: entry,
         multipliedFactor: 1.0,
-        local: { ...scope.local },
+        local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
 
@@ -383,7 +383,7 @@ function processImpactBase<S extends string>(
         entry: scope.entry,
         root: scope.root,
         value: impacts,
-        local: { ...scope.local },
+        local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
 
@@ -779,7 +779,7 @@ function processRelationBase<S extends string>(
         entry: scope.entry,
         root: scope.root,
         value: relations,
-        local: { ...scope.local },
+        local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
 
@@ -983,7 +983,7 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
         root: scope.root,
         factor,
         multipliedFactor: scope.multipliedFactor * factor,
-        local: { ...scope.local },
+        local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
 
@@ -1061,7 +1061,7 @@ function processScript(
 function executeScript(scope: Scope, script: string, entryPoint: string | undefined): void {
     new Function("global", "local", "scope", script).apply(scope, [scope.root.global, scope.local]);
     if (entryPoint !== undefined) {
-        scope.local[entryPoint]();
+        (scope.local as Record<string, () => void>)[entryPoint]();
     }
 }
 
