@@ -6,7 +6,7 @@ import { writableStreamFromWriter } from "https://deno.land/std@0.181.0/streams/
 
 if (Deno.args.length == 0) {
     console.error(
-        "Usage: [deno run --allow-all] scripts/generate_DAH_anime_normalize.json [output path]"
+        "Usage: [deno run --allow-all] scripts/generate_DAH_anime_normalize.ts [output path]"
     );
     Deno.exit(1);
 }
