@@ -422,6 +422,7 @@
         </xs:choice>
         <xs:attribute name="id" type="EntryId" use="required" />
         <xs:attribute name="title" type="xs:string" use="required" />
+        <xs:attribute name="entrytype" type="EntryType" />
         <xs:attribute ref="generatedBy" />
     </xs:complexType>
 
@@ -714,9 +715,40 @@
     <xs:simpleType name="EntryId">
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="$-\d+|.* \[null entry\]|(GF|[AMLVFGO])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})(-\d+)?"
+                value="$-\d+|OU-[A-Z0-9-]*|.* \[null entry\]|(GF|[AMLVFGO])-((MAL|AL|ADB|KS|VNDB|VGMDB|VGMDB-AL|VGMDB-AR)-\d+(-\d+)?|\d{8}T\d{6})(-\d+)?"
             />
         </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="StandardEntryType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Anime" />
+            <xs:enumeration value="Manga" />
+            <xs:enumeration value="LightNovel" />
+            <!-- either LightNovel or Manga -->
+            <!-- used when the type can't be deduced from the ID -->
+            <xs:enumeration value="LightNovelGeneric" />
+            <xs:enumeration value="VisualNovel" />
+            <xs:enumeration value="MusicGeneric" />
+            <xs:enumeration value="MusicAlbum" />
+            <xs:enumeration value="MusicArtist" />
+            <xs:enumeration value="MusicTrack" />
+            <!-- when the album is a single and there are no separate entries for album/track -->
+            <!-- needless to say, prefer to separate the entries instead of using this entry type -->
+            <xs:enumeration value="MusicAlbumTrack" />
+            <xs:enumeration value="Franchise" />
+            <xs:enumeration value="Game" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="NonStandardEntryType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="Other(:.*)?"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="EntryType">
+        <xs:union memberTypes="StandardEntryType NonStandardEntryType" />
     </xs:simpleType>
 
     <xs:simpleType name="SpecialDate">
