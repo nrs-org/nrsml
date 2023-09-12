@@ -101,6 +101,29 @@
                         <xs:attribute ref="generatedBy" />
                     </xs:complexType>
                 </xs:element>
+                <xs:element name="youtube" minOccurs="0">
+                    <xs:complexType>
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element ref="meta" />
+                        </xs:choice>
+                        <xs:attribute name="video" type="xs:string" />
+                        <xs:attribute name="from" type="Duration" />
+                        <xs:attribute name="to" type="Duration" />
+                        <xs:attribute name="playlist" type="xs:string" />
+                        <xs:attribute name="channel-id" type="xs:string" />
+                        <xs:attribute name="channel-handle" type="xs:string" />
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="spotify" minOccurs="0">
+                    <xs:complexType>
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element ref="meta" />
+                        </xs:choice>
+                        <xs:attribute name="track" type="xs:string"/>
+                        <xs:attribute name="artist" type="xs:string"/>
+                        <xs:attribute name="album" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
                 <xs:element name="urls" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
