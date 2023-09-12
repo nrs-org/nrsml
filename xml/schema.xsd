@@ -34,9 +34,10 @@
                 <xs:element ref="directive" />
                 <xs:element ref="contains" />
             </xs:choice>
-            <xs:attribute name="factor" type="ContainFactor" />
             <xs:attribute name="id" type="EntryId" />
             <xs:attribute ref="generatedBy" />
+            <xs:attribute name="factor" type="ContainFactor" />
+            <xs:attribute name="roles" type="RolesString" />
         </xs:complexType>
     </xs:element>
     <xs:element name="script" substitutionGroup="directive">
@@ -377,7 +378,8 @@
     <xs:element name="contributor">
         <xs:complexType>
             <xs:attribute name="id" type="EntryId" use="required" />
-            <xs:attribute name="factor" type="ContainFactor" use="required" />
+            <xs:attribute name="factor" type="ContainFactor" />
+            <xs:attribute name="roles" type="RolesString" />
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
@@ -741,4 +743,40 @@
             </xs:documentation>
         </xs:annotation>
     </xs:attribute>
+
+    <xs:simpleType name="RolesString">
+        <xs:annotation>
+            <xs:documentation>
+                Replacement API for contain/contributing factors, which provides more metadata
+                of the exact contain/contributing relationship between objects.
+
+                Roles list:
+                `total`: Total role (weight 1.0)
+                `image`: Music promotional image role
+                `prod`: Music production role
+                `inst`: Music instrumental production role (simultaneously)
+                `vocal-lyrics`: Vocal + lyrics-writing role (simultaneously)
+                `vocal`: Vocal role
+                `lyrics`: Lyrics-writing role
+                `compose`: Music composing role
+                `arrange`: Music arranging role
+                `inst-perform`: Instrumental performing role (Vocal performing role already has
+                `vocal` role)
+
+                Make a composite role by chaining simple roles, e.g. nayuta in Azure Reunion
+                has `roles="image:vocal:lyrics"`.
+
+                If many people have the same role (e.g. 2 vocalists in Asuiro Koi Moyou), then
+                use the divide ('/') suffix: `roles="vocal/2"`.
+
+                The multiply suffix '*' is also supported, but it does not have much use at the
+                moment.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <!-- replace GAMING with (total|image|prod|inst|vocal-lyrics|vocal|lyrics|compose|arrange|inst-perform) -->
+            <!-- <xs:pattern value="GAMING([\*/]\d+(.\d*)?)?(:GAMING([\*/]\d+(.\d*)?)?)*" /> -->
+            <xs:pattern value="(total|image|prod|inst|vocal-lyrics|vocal|lyrics|compose|arrange|inst-perform)([\*/]\d+(\.\d*)?)?(:(total|image|prod|inst|vocal-lyrics|vocal|lyrics|compose|arrange|inst-perform)([\*/]\d+(\.\d*)?)?)*" />
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>
