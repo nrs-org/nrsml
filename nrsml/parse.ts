@@ -2,6 +2,10 @@ import { Macro, substituteMacro } from "./macro.ts";
 import { assert, deepFreeze, isElement, isObject, standardParser } from "./utils.ts";
 
 import {
+    DateTime,
+    Duration,
+    Matrix,
+    YoutubeSource,
     Data,
     Entry,
     Impact,
@@ -28,11 +32,11 @@ import {
     Sign,
     VisualType,
     EntryStatus,
-    DateTime,
-    Duration,
-    ifDefined,
     AdditionalSources,
+    ifDefined,
     Meta,
+    ScalarMatrix,
+    identityMatrix,
 } from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
@@ -73,7 +77,7 @@ interface EntryScope {
     parent: DocumentScope | ContainsScope | EntryScope;
     value: Entry;
     local: unknown;
-    multipliedFactor: 1.0;
+    multipliedFactor: ScalarMatrix;
     macros: Map<string, Macro>;
 }
 
@@ -102,8 +106,8 @@ interface ContainsScope {
     root: DocumentScope;
     entry: EntryScope;
     parent: EntryScope | ContainsScope;
-    factor: number;
-    multipliedFactor: number;
+    factor: Matrix;
+    multipliedFactor: Matrix;
     local: unknown;
     macros: Map<string, Macro>;
 }
@@ -275,10 +279,13 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
 
     if ("multipliedFactor" in scope) {
         const children = scope.entry.value.children;
-        children.set(
-            entry.id,
-            Math.min(1.0, (children.get(entry.id) ?? 0.0) + scope.multipliedFactor)
-        );
+        const newFactor = scope.multipliedFactor.copy();
+        if (children.has(entry.id)) {
+            newFactor.add(children.get(entry.id)!);
+        }
+
+        newFactor.clamp01();
+        children.set(entry.id, newFactor);
     }
 
     const partialEntryScope: Partial<EntryScope> = {
@@ -286,7 +293,7 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
         root: scope.root,
         type: "entry",
         value: entry,
-        multipliedFactor: 1.0,
+        multipliedFactor: identityMatrix,
         local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
@@ -392,12 +399,15 @@ function processImpactBase<S extends string>(
         if (isElement(childNode, "contributor")) {
             const attrs = getAttributes(childNode);
             const id = transformId(scope, attrs["id"]!);
-            const factor = scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0");
-
-            impacts[0].contributors.set(
-                id,
-                Math.min(1.0, (impacts[0].contributors.get(id) ?? 0.0) + factor)
+            const factor = new ScalarMatrix(
+                scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0")
             );
+            if (impacts[0].contributors.has(id)) {
+                factor.add(impacts[0].contributors.get(id)!);
+            }
+
+            factor.clamp01();
+            impacts[0].contributors.set(id, factor);
         } else if (
             !processScript(impactScope, childNode) &&
             !processCommonMeta(impactScope, childNode) &&
@@ -419,7 +429,7 @@ function acceptImpact(scope: Scope, impact: Impact) {
     scope.root.value.data.impacts.push(impact);
     if (impact.contributors.size == 0) {
         if (scope.entry !== undefined) {
-            impact.contributors.set(scope.entry.value.id, 1.0);
+            impact.contributors.set(scope.entry.value.id, identityMatrix);
         }
     }
 }
@@ -442,7 +452,7 @@ function processScore(scope: Scope, node: unknown): Vector | undefined {
 
     const vector =
         getAttributes(node)["vector"]?.split(",")?.map(parseFloat) ??
-        newZeroVector(scope.root.context);
+        newZeroVector(scope.root.context).data;
     for (const childNode of node["score"] as Array<unknown>) {
         if (!isElement(childNode, "component")) {
             scope.root.config.ignoreNodes.push(childNode);
@@ -455,7 +465,7 @@ function processScore(scope: Scope, node: unknown): Vector | undefined {
         vector[factor.factorIndex] = value;
     }
 
-    return vector;
+    return new Vector(vector);
 }
 
 function processCry(scope: DocumentScope | EntryScope | ContainsScope, node: unknown) {
@@ -791,10 +801,13 @@ function processRelationBase<S extends string>(
             const factor = parseFloat(attrs["factor"]);
 
             for (const impact of relations) {
-                impact.contributors.set(
-                    id,
-                    Math.min(1.0, (impact.contributors.get(id) ?? 0.0) + factor)
-                );
+                const factorMatrix = new ScalarMatrix(factor);
+                if (impact.contributors.has(id)) {
+                    factorMatrix.add(impact.contributors.get(id)!);
+                }
+
+                factorMatrix.clamp01();
+                impact.contributors.set(id, factorMatrix);
             }
         } else if (
             !processScript(relationScope, childNode) &&
@@ -810,7 +823,7 @@ function processRelationBase<S extends string>(
         scope.root.value.data.relations.push(relation);
         if (relation.contributors.size == 0) {
             if (scope.entry !== undefined) {
-                relation.contributors.set(scope.entry.value.id, 1.0);
+                relation.contributors.set(scope.entry.value.id, identityMatrix);
             }
         }
     }
@@ -969,11 +982,15 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
     }
 
     const attrs = getAttributes(node);
-    const factor = scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0");
+    const factor = new ScalarMatrix(
+        scope.root.config.containFactorEvaluator(attrs["factor"] ?? "1.0")
+    );
+
     let id = attrs["id"];
+    const multipliedFactor = scope.multipliedFactor.mul(factor);
     if (id !== undefined) {
         id = transformId(scope, id);
-        scope.entry.value.children.set(id, scope.multipliedFactor * factor);
+        scope.entry.value.children.set(id, multipliedFactor);
     }
 
     const containsScope: ContainsScope = {
@@ -982,7 +999,7 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
         entry: scope.entry,
         root: scope.root,
         factor,
-        multipliedFactor: scope.multipliedFactor * factor,
+        multipliedFactor,
         local: Object.assign({}, scope.local),
         macros: new Map(scope.macros),
     };
@@ -1059,7 +1076,11 @@ function processScript(
 }
 
 function executeScript(scope: Scope, script: string, entryPoint: string | undefined): void {
-    new Function("global", "local", "scope", script).apply(scope, [scope.root.global, scope.local]);
+    new Function("global", "local", "scope", script).apply(scope, [
+        scope.root.global,
+        scope.local,
+        scope,
+    ]);
     if (entryPoint !== undefined) {
         (scope.local as Record<string, () => void>)[entryPoint]();
     }
@@ -1110,6 +1131,28 @@ function processSource(scope: EntryScope, node: unknown): boolean {
 
         if ("vgmdb" in childNode) {
             DAH_additional_sources.vgmdb = getAttributes(childNode);
+        } else if ("youtube" in childNode) {
+            const attrs = getAttributes(childNode);
+            if (attrs["video"] !== undefined) {
+                DAH_additional_sources.youtube = {
+                    video: attrs["video"] as string,
+                    from: ifDefined(attrs["from"] as string | undefined, parseDuration),
+                    to: ifDefined(attrs["to"] as string | undefined, parseDuration),
+                    DAH_meta: {},
+                };
+            } else if (attrs["playlist"] !== undefined) {
+                DAH_additional_sources.youtube = {
+                    video: attrs["playlist"] as string,
+                    DAH_meta: {},
+                };
+            } else {
+                DAH_additional_sources.youtube = {
+                    channelId: attrs["channel-id"],
+                    channelHandle: attrs["channel-handle"],
+                    DAH_meta: {},
+                };
+            }
+            DAH_additional_sources.youtube = getAttributes(childNode) as YoutubeSource;
         } else if ("urls" in childNode) {
             const urlObjects = (DAH_additional_sources.urls ??= []);
 

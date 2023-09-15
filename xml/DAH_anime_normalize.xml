@@ -74,8 +74,8 @@
         <visual type="animated" base="0.8" unique="0.5" />
     </entry>
 
-    <entry id="M-VGMDB-1" title="MAL-10 base anime sample music"><music base="0.5" /></entry>
-    <entry id="M-VGMDB-2" title="MAL-10 base anime sample music"><music base="0.6" /></entry>
-    <entry id="M-VGMDB-3" title="MAL-10 base anime sample music"><music base="0.7" /></entry>
-    <entry id="M-VGMDB-4" title="MAL-10 base anime sample music"><music base="0.8" /></entry>
+    <entry id="M-VGMDB-1" title="MAL-10 base anime sample music" entrytype="MusicAlbumTrack"><music base="0.5" /></entry>
+    <entry id="M-VGMDB-2" title="MAL-10 base anime sample music" entrytype="MusicAlbumTrack"><music base="0.6" /></entry>
+    <entry id="M-VGMDB-3" title="MAL-10 base anime sample music" entrytype="MusicAlbumTrack"><music base="0.7" /></entry>
+    <entry id="M-VGMDB-4" title="MAL-10 base anime sample music" entrytype="MusicAlbumTrack"><music base="0.8" /></entry>
 </document>

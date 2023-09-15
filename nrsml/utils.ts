@@ -96,7 +96,6 @@ export function assert(condition: boolean, msg?: string): asserts condition {
 
 export function deepFreeze(object: unknown) {
     // Retrieve the property names defined on object
-    // deno-lint-ignore ban-types
     const propNames = Reflect.ownKeys(object as object);
 
     // Freeze properties before freezing self
