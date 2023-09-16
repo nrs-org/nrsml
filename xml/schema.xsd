@@ -622,9 +622,7 @@
     </xs:simpleType>
 
     <xs:simpleType name="ContainFactor">
-        <xs:restriction base="xs:string">
-            <xs:pattern value="\d+(\.\d+)?(\/\d+)?" />
-        </xs:restriction>
+        <xs:union memberTypes="xs:string" />
     </xs:simpleType>
 
     <xs:simpleType name="VisualKind">
