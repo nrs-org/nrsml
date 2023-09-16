@@ -37,6 +37,8 @@ import {
     Meta,
     ScalarMatrix,
     identityMatrix,
+    EntryType,
+    StandardEntryType,
 } from "../deps.ts";
 
 type Scope = DocumentScope | EntryScope | ImpactScope | RelationScope | ContainsScope;
@@ -149,15 +151,13 @@ function processRoot(context: Context, document: unknown, options: ProcessOption
             includeResolver: () => undefined,
             scriptResolver: () => undefined,
             containFactorEvaluator: (expression) => {
-                const f = new Function(
-                    "vocal",
-                    "inst",
-                    "image",
-                    "main",
-                    "feat",
-                    "return " + expression
-                );
-                return f.apply(undefined, [0.4, 0.4, 0.2, 0.6, 0.4]) as number;
+                const f = new Function("return " + expression);
+                const value = f.apply(undefined);
+                if (typeof value === "number") {
+                    return value;
+                }
+
+                throw new Error(expression);
             },
             rootScope: null!,
             ignoreNodes: [],
@@ -263,17 +263,55 @@ function processSimpleDirective(
     );
 }
 
+function guessEntryTypeFromId(id: string): EntryType {
+    const prefix = id[0];
+    if (prefix === "A") {
+        return StandardEntryType.Anime;
+    } else if (prefix === "L") {
+        return StandardEntryType.LightNovelGeneric;
+    } else if (prefix === "V") {
+        return StandardEntryType.VisualNovel;
+    } else if (prefix === "F") {
+        return StandardEntryType.Franchise;
+    } else if (prefix === "G") {
+        return StandardEntryType.Game;
+    } else if (prefix === "M") {
+        if (id.startsWith("M-VGMDB-AR")) {
+            return StandardEntryType.MusicArtist;
+        }
+
+        const numTokens = id.split("-").length;
+        if (id.startsWith("M-VGMDB-AL")) {
+            return numTokens === 4 ? StandardEntryType.MusicAlbum : StandardEntryType.MusicTrack;
+        }
+
+        if (numTokens === 3) {
+            return StandardEntryType.MusicTrack;
+        }
+
+        return StandardEntryType.MusicGeneric;
+    }
+
+    return "Other";
+}
+
 function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
     if (!(isObject(node) && "entry" in node)) {
         return false;
     }
 
     const attrs = getAttributes(node);
+    const id = transformId(scope, attrs["id"]!);
+    let entryType = guessEntryTypeFromId(id);
+    if ("entrytype" in attrs) {
+        entryType = attrs["entrytype"] as EntryType;
+    }
     const entry: Entry = {
-        id: transformId(scope, attrs["id"]!),
+        id,
         children: new Map(),
         DAH_meta: {
             DAH_entry_title: attrs["title"]!,
+            DAH_entry_type: entryType,
         },
     };
 
@@ -311,7 +349,8 @@ function processEntry(scope: DocumentScope | EntryScope | ContainsScope, node: u
             !processDirective(entryScope, childNode) &&
             !processEntryMeta(entryScope, childNode) &&
             !processCommonMeta(entryScope, childNode) &&
-            !processContains(entryScope, childNode)
+            !processContains(entryScope, childNode) &&
+            !processRole(entryScope, childNode)
         ) {
             scope.root.config.ignoreNodes.push(childNode);
         }
@@ -412,6 +451,7 @@ function processImpactBase<S extends string>(
             !processScript(impactScope, childNode) &&
             !processCommonMeta(impactScope, childNode) &&
             !processImpactMeta(impactScope, childNode) &&
+            !processRole(impactScope, childNode) &&
             !childNodeCallback(impactScope, childNode)
         ) {
             scope.root.config.ignoreNodes.push(childNode);
@@ -813,6 +853,7 @@ function processRelationBase<S extends string>(
             !processScript(relationScope, childNode) &&
             !processCommonMeta(relationScope, childNode) &&
             !processRelationMeta(relationScope, childNode) &&
+            !processRole(relationScope, childNode) &&
             !childNodeCallback(relationScope, childNode)
         ) {
             scope.root.config.ignoreNodes.push(childNode);
@@ -1030,6 +1071,30 @@ function processContains(scope: EntryScope | ContainsScope, node: unknown): bool
     return true;
 }
 
+function processRole(scope: EntryScope | ImpactScope | RelationScope, node: unknown): boolean {
+    if (!isElement(node, "role")) {
+        return false;
+    }
+
+    ifDefined(scope.root.context.extensions.DAH_entry_roles, (e) => {
+        const attrs = getAttributes(node);
+        const id = attrs["id"]!;
+        const roleString = attrs["roles"];
+        const roles = e.parseRoleExpressionString(roleString);
+
+        const value = scope.value;
+        if (value instanceof Array) {
+            for (const ir of value) {
+                e.addRole(ir, id, roles);
+            }
+        } else {
+            e.addRole(value, id, roles);
+        }
+    });
+
+    return true;
+}
+
 // expand the macro, if this is not a `ref` element, return undefined
 function processReference(scope: Scope, node: unknown): unknown[] | undefined {
     if (!(isObject(node) && "ref" in node)) {
@@ -1094,7 +1159,8 @@ function processEntryMeta(scope: EntryScope, node: unknown): boolean {
         processConsumedProgress(scope, node) ||
         processAnimeConsumedProgress(scope, node) ||
         processMusicConsumedProgress(scope, node) ||
-        processBestGirl(scope, node)
+        processBestGirl(scope, node) ||
+        processEntryQueue(scope, node)
     );
 }
 
@@ -1132,27 +1198,15 @@ function processSource(scope: EntryScope, node: unknown): boolean {
         if ("vgmdb" in childNode) {
             DAH_additional_sources.vgmdb = getAttributes(childNode);
         } else if ("youtube" in childNode) {
-            const attrs = getAttributes(childNode);
-            if (attrs["video"] !== undefined) {
-                DAH_additional_sources.youtube = {
-                    video: attrs["video"] as string,
-                    from: ifDefined(attrs["from"] as string | undefined, parseDuration),
-                    to: ifDefined(attrs["to"] as string | undefined, parseDuration),
-                    DAH_meta: {},
-                };
-            } else if (attrs["playlist"] !== undefined) {
-                DAH_additional_sources.youtube = {
-                    video: attrs["playlist"] as string,
-                    DAH_meta: {},
-                };
-            } else {
-                DAH_additional_sources.youtube = {
-                    channelId: attrs["channel-id"],
-                    channelHandle: attrs["channel-handle"],
-                    DAH_meta: {},
-                };
-            }
-            DAH_additional_sources.youtube = getAttributes(childNode) as YoutubeSource;
+            DAH_additional_sources.youtube = {
+                ...getAttributes(childNode),
+                DAH_meta: {},
+            } as YoutubeSource;
+        } else if ("spotify" in childNode) {
+            DAH_additional_sources.spotify = {
+                ...getAttributes(childNode),
+                DAH_meta: {},
+            } as typeof DAH_additional_sources.spotify;
         } else if ("urls" in childNode) {
             const urlObjects = (DAH_additional_sources.urls ??= []);
 
@@ -1378,6 +1432,20 @@ function processValidatorSuppress(
             for (const rule of rules) {
                 e.suppressRule<Meta>(elem, rule);
             }
+        }
+    });
+    return true;
+}
+
+function processEntryQueue(scope: EntryScope, node: unknown): boolean {
+    if (!(isObject(node) && "queue" in node)) {
+        return false;
+    }
+
+    const rules = getAttributes(node)["queues"]!.split(";");
+    ifDefined(scope.root.context.extensions.DAH_validator_suppress, (e) => {
+        for (const rule of rules) {
+            e.suppressRule<Meta>(scope.value, rule);
         }
     });
     return true;

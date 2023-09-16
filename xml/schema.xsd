@@ -37,9 +37,16 @@
             <xs:attribute name="id" type="EntryId" />
             <xs:attribute ref="generatedBy" />
             <xs:attribute name="factor" type="ContainFactor" />
-            <xs:attribute name="roles" type="RolesString" />
         </xs:complexType>
     </xs:element>
+    <xs:element name="role">
+        <xs:complexType>
+            <xs:attribute name="id" type="EntryId" use="required" />
+            <xs:attribute name="roles" type="RolesString" use="required" />
+            <xs:attribute ref="generatedBy" />
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="script" substitutionGroup="directive">
         <xs:complexType>
             <xs:simpleContent>
@@ -145,11 +152,14 @@
             <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
-
     <xs:element name="musicvar" substitutionGroup="entryMeta">
         <xs:complexType>
-            <xs:attribute name="vocal" type="xs:double" />
-            <xs:attribute name="arrange" type="xs:double" />
+            <xs:attribute name="vocallyrics" type="xs:double" default="0.5" />
+            <xs:attribute name="lyricsmusic" type="xs:double" default="0.1" />
+            <xs:attribute name="emolyrics" type="xs:double" default="0.2" />
+            <xs:attribute name="arrange" type="xs:double" default="0.5" />
+            <xs:attribute name="feat" type="xs:boolean" default="false" />
+            <xs:attribute ref="generatedBy" />
         </xs:complexType>
     </xs:element>
 
@@ -443,12 +453,19 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="queue" substitutionGroup="entryMeta">
+        <xs:complexType>
+            <xs:attribute name="queues" type="xs:string" />
+        </xs:complexType>
+    </xs:element>
+
     <xs:complexType name="Entry">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="directive" />
             <xs:element ref="entryMeta" />
             <xs:element ref="commonMeta" />
             <xs:element ref="contains" />
+            <xs:element ref="role" />
         </xs:choice>
         <xs:attribute name="id" type="EntryId" use="required" />
         <xs:attribute name="title" type="xs:string" use="required" />
@@ -464,6 +481,7 @@
             <xs:element ref="ref" />
             <xs:element ref="commonMeta" />
             <xs:element ref="impactMeta" />
+            <xs:element ref="role" />
         </xs:choice>
         <xs:attribute ref="generatedBy" />
     </xs:complexType>
@@ -532,6 +550,7 @@
             <xs:element ref="ref" />
             <xs:element ref="commonMeta" />
             <xs:element ref="relationMeta" />
+            <xs:element ref="role" />
         </xs:choice>
         <xs:attribute ref="generatedBy" />
     </xs:complexType>
@@ -603,7 +622,9 @@
     </xs:simpleType>
 
     <xs:simpleType name="ContainFactor">
-        <xs:union memberTypes="xs:string" />
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d+(\.\d+)?(\/\d+)?" />
+        </xs:restriction>
     </xs:simpleType>
 
     <xs:simpleType name="VisualKind">
@@ -823,7 +844,7 @@
         </xs:annotation>
         <xs:restriction base="xs:string">
             <xs:pattern
-                value="(total|image|prod|inst|vocal-lyrics|vocal|lyrics|compose|arrange|inst-perform)([\*/]\d+(\.\d*)?)*(\+(total|image|prod|inst|vocal-lyrics|vocal|lyrics|compose|arrange|inst-perform)([\*/]\d+(\.\d*)?)*)*" />
+                value="(total|compose|arrange|image|image_feat|vocal|lyrics|inst_perform|mv|albumart|music_total|image_total|prod|perform|vocal_lyrics|inst|inst_total)([\*/]\d+(\.\d*)?)*(\+(total|compose|arrange|image|image_feat|vocal|lyrics|inst_perform|mv|albumart|music_total|image_total|prod|perform|vocal_lyrics|inst|inst_total)([\*/]\d+(\.\d*)?)*)*" />
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>
