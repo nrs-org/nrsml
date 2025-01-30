@@ -809,6 +809,19 @@ function processOsuSong(scope: DocumentScope | EntryScope | ContainsScope, node:
     ]);
 }
 
+function processWriting(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "writing", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.writing(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["character"]!),
+            parseFloat(attrs["story"]!),
+            parseFloat(attrs["pacing"]!),
+            parseFloat(attrs["originality"]!)
+        ),
+    ]);
+}
+
 function processRelationBase<S extends string>(
     scope: DocumentScope | EntryScope | ContainsScope,
     node: unknown,

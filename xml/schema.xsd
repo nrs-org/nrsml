@@ -330,6 +330,19 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="writing" substitutionGroup="impact">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Impact">
+                    <xs:attribute name="character" type="xs:double" use="required" />
+                    <xs:attribute name="story" type="xs:double" use="required" />
+                    <xs:attribute name="pacing" type="xs:double" use="required" />
+                    <xs:attribute name="originality" type="xs:double" use="required" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="remix" substitutionGroup="relation">
         <xs:complexType>
             <xs:complexContent>
