@@ -394,6 +394,7 @@ function processImpact(scope: DocumentScope | EntryScope | ContainsScope, node: 
         processAdditional,
         processVisual,
         processOsuSong,
+        processWriting,
     ];
 
     for (const process of processes) {
