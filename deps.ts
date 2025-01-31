@@ -1,12 +1,12 @@
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/mod.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_factors.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_standards.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_additional_sources.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_entry_progress.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_entry_title.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_entry_type.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_entry_bestGirl.ts";
-export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+1/exts/DAH_validator_suppress.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/mod.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_factors.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_standards.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_additional_sources.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_entry_progress.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_entry_title.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_entry_type.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_entry_bestGirl.ts";
+export * from "https://raw.githubusercontent.com/btmxh/nrs-lib-ts/v2.2.0-pr19+2/exts/DAH_validator_suppress.ts";
 
 export { XMLBuilder, XMLParser } from "npm:fast-xml-parser@4";
 
