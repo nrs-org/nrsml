@@ -394,6 +394,7 @@ function processImpact(scope: DocumentScope | EntryScope | ContainsScope, node: 
         processAdditional,
         processVisual,
         processOsuSong,
+        processWriting,
     ];
 
     for (const process of processes) {
@@ -805,6 +806,19 @@ function processOsuSong(scope: DocumentScope | EntryScope | ContainsScope, node:
             new Map(),
             parseFloat(attrs["personal"] ?? "0.0"),
             parseFloat(attrs["community"] ?? "0.0")
+        ),
+    ]);
+}
+
+function processWriting(scope: DocumentScope | EntryScope | ContainsScope, node: unknown): boolean {
+    return processImpactBase(scope, node, "writing", (attrs) => [
+        scope.root.context.extensions.DAH_standards!.writing(
+            scope.root.context,
+            new Map(),
+            parseFloat(attrs["character"]!),
+            parseFloat(attrs["story"]!),
+            parseFloat(attrs["pacing"]!),
+            parseFloat(attrs["originality"]!)
         ),
     ]);
 }
