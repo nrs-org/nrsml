@@ -1403,7 +1403,7 @@ function preprocessMacros(scope: Scope, childNodes: unknown[]) {
         }
         const attrs = getAttributes(node);
         const name = attrs["name"];
-        const variables = attrs["vars"]
+        const variables = (attrs["vars"] ?? "")
             .split(",")
             .map((x) => x.trim())
             .map((x) => x.split(":")[0]);
